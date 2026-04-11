@@ -316,11 +316,11 @@ export default async function ListingDetailPage({ params }: PageProps) {
             <Separator />
 
             {/* Inquiry form (mobile — shown below main content on small screens) */}
-            <section className="lg:hidden" id="inquiry-form">
+            <section className="lg:hidden" id="inquiry-form-mobile">
               <h2 className="text-lg font-semibold text-foreground mb-4">
                 Contact agent
               </h2>
-              <InquiryForm listingId={id} agentName={agent.name} />
+              <InquiryForm listingId={id} agentName={agent.name} idPrefix="mobile-inquiry" />
             </section>
           </div>
 

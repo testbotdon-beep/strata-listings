@@ -12,6 +12,7 @@ interface InquiryFormProps {
   listingId: string
   agentName: string
   className?: string
+  idPrefix?: string
 }
 
 interface FormState {
@@ -21,7 +22,7 @@ interface FormState {
   message: string
 }
 
-export function InquiryForm({ listingId, agentName, className }: InquiryFormProps) {
+export function InquiryForm({ listingId, agentName, className, idPrefix = 'inquiry' }: InquiryFormProps) {
   const [form, setForm] = useState<FormState>({
     name: '',
     email: '',
@@ -103,11 +104,11 @@ export function InquiryForm({ listingId, agentName, className }: InquiryFormProp
     <form onSubmit={handleSubmit} className={cn('flex flex-col gap-4', className)} noValidate>
       {/* Name */}
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="inquiry-name" className="text-sm font-medium">
+        <Label htmlFor={`${idPrefix}-name`} className="text-sm font-medium">
           Your name <span className="text-destructive">*</span>
         </Label>
         <Input
-          id="inquiry-name"
+          id={`${idPrefix}-name`}
           type="text"
           placeholder="John Doe"
           value={form.name}
@@ -122,11 +123,11 @@ export function InquiryForm({ listingId, agentName, className }: InquiryFormProp
 
       {/* Email */}
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="inquiry-email" className="text-sm font-medium">
+        <Label htmlFor={`${idPrefix}-email`} className="text-sm font-medium">
           Email address <span className="text-destructive">*</span>
         </Label>
         <Input
-          id="inquiry-email"
+          id={`${idPrefix}-email`}
           type="email"
           placeholder="john@example.com"
           value={form.email}
@@ -141,11 +142,11 @@ export function InquiryForm({ listingId, agentName, className }: InquiryFormProp
 
       {/* Phone */}
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="inquiry-phone" className="text-sm font-medium">
+        <Label htmlFor={`${idPrefix}-phone`} className="text-sm font-medium">
           Phone number
         </Label>
         <Input
-          id="inquiry-phone"
+          id={`${idPrefix}-phone`}
           type="tel"
           placeholder="+65 9123 4567"
           value={form.phone}
@@ -156,11 +157,11 @@ export function InquiryForm({ listingId, agentName, className }: InquiryFormProp
 
       {/* Message */}
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="inquiry-message" className="text-sm font-medium">
+        <Label htmlFor={`${idPrefix}-message`} className="text-sm font-medium">
           Message <span className="text-destructive">*</span>
         </Label>
         <Textarea
-          id="inquiry-message"
+          id={`${idPrefix}-message`}
           placeholder="I am interested in this property..."
           value={form.message}
           onChange={handleChange('message')}
