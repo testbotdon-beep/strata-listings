@@ -118,7 +118,7 @@ export default function OpenGraphImage() {
               display: 'flex',
             }}
           >
-            10,000+ verified listings · 500+ licensed agents
+            HDB · Condos · Landed · Commercial · All 28 districts
           </div>
         </div>
       </div>

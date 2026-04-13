@@ -9,9 +9,9 @@ export const metadata: Metadata = {
 }
 
 const STATS = [
-  { value: '10,000+', label: 'Verified listings' },
-  { value: '500+', label: 'Licensed agents' },
   { value: '28', label: 'Districts covered' },
+  { value: '4', label: 'Property types' },
+  { value: '6', label: 'In-depth area guides' },
   { value: '2026', label: 'Year launched' },
 ]
 

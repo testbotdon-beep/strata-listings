@@ -20,7 +20,7 @@ const FEATURES = [
     icon: ListChecks,
     title: 'List for free',
     description:
-      'No listing fees. No featured upgrades to pay for. Just list your properties and reach thousands of serious buyers and renters.',
+      'No listing fees. No featured upgrades. List your properties and reach motivated Singapore buyers and renters.',
   },
   {
     icon: Zap,

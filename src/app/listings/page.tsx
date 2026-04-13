@@ -9,7 +9,7 @@ import { SearchBar } from '@/components/search-bar'
 export const metadata: Metadata = {
   title: 'Browse Properties — Strata Listings',
   description:
-    'Search thousands of Singapore property listings. Filter by type, district, price, and more.',
+    'Search Singapore property listings. Filter by type, district, price, bedrooms, MRT and more.',
 }
 
 interface PageProps {

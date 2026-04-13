@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     template: '%s | Strata Listings',
   },
   description:
-    'Find your next home in Singapore. Browse HDB flats, condos, landed homes, and commercial listings across every district. Verified by licensed CEA agents.',
+    "Find your next home in Singapore. Browse HDB flats, condos, landed homes, and commercial listings across all 28 districts. Listings posted by licensed CEA agents.",
   keywords: [
     'Singapore property',
     'HDB for sale',

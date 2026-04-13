@@ -10,7 +10,10 @@ import {
   Users,
   Award,
 } from 'lucide-react'
+import Image from 'next/image'
 import { getFeaturedListings, getListings } from '@/lib/data'
+import { getFeaturedArticles } from '@/lib/articles'
+import { getAllGuides } from '@/lib/guides'
 import { ListingCard } from '@/components/listing-card'
 import { SearchBar } from '@/components/search-bar'
 
@@ -20,7 +23,6 @@ const PROPERTY_TYPES = [
     label: 'HDB Flats',
     description: 'Affordable public housing across every town',
     icon: Home,
-    count: '4,200+',
     color: 'bg-blue-50 text-blue-600',
   },
   {
@@ -28,7 +30,6 @@ const PROPERTY_TYPES = [
     label: 'Condos',
     description: 'Private condos with full facilities',
     icon: Building2,
-    count: '6,800+',
     color: 'bg-violet-50 text-violet-600',
   },
   {
@@ -36,7 +37,6 @@ const PROPERTY_TYPES = [
     label: 'Landed',
     description: 'Terraces, semi-Ds, and bungalows',
     icon: TreePine,
-    count: '900+',
     color: 'bg-emerald-50 text-emerald-600',
   },
   {
@@ -44,7 +44,6 @@ const PROPERTY_TYPES = [
     label: 'Commercial',
     description: 'Offices, shophouses, and industrial',
     icon: Briefcase,
-    count: '500+',
     color: 'bg-amber-50 text-amber-600',
   },
 ]
@@ -113,16 +112,36 @@ const MARKET_INSIGHTS = [
     positive: null,
   },
   {
-    metric: 'New launch enquiries',
-    value: '12,000+',
-    source: 'Past 30 days',
+    metric: 'HDB resale transactions',
+    value: '6,728',
+    source: 'Q1 2026 — HDB',
     positive: null,
   },
 ]
 
+const CATEGORY_LABELS: Record<string, string> = {
+  'market-insights': 'Market Insights',
+  'guides': 'Guides',
+  'new-launches': 'New Launches',
+  'investment': 'Investment',
+  'legal-tax': 'Legal & Tax',
+}
+
+const CATEGORY_COLORS: Record<string, string> = {
+  'market-insights': 'bg-blue-50 text-blue-700',
+  'guides': 'bg-emerald-50 text-emerald-700',
+  'new-launches': 'bg-violet-50 text-violet-700',
+  'investment': 'bg-amber-50 text-amber-700',
+  'legal-tax': 'bg-rose-50 text-rose-700',
+}
+
 export default function HomePage() {
   const featured = getFeaturedListings()
   const all = getListings()
+  const featuredArticles = getFeaturedArticles().slice(0, 3)
+  const allGuides = getAllGuides()
+  // Map district number → guide slug for popular neighbourhoods
+  const guideByDistrict = new Map(allGuides.map((g) => [g.district, g.slug]))
 
   // Pad featured to 6 by appending first non-featured listings
   const featuredIds = new Set(featured.map((l) => l.id))
@@ -151,8 +170,8 @@ export default function HomePage() {
 
             {/* Subtitle */}
             <p className="max-w-lg text-base text-slate-600 sm:text-lg leading-relaxed">
-              Browse over 10,000 HDB flats, condos, and landed homes across
-              every district.
+              Browse HDB flats, condos, landed homes, and commercial properties
+              across all 28 districts.
             </p>
 
             {/* Search bar */}
@@ -217,7 +236,7 @@ export default function HomePage() {
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {PROPERTY_TYPES.map(({ key, label, description, icon: Icon, count, color }) => (
+            {PROPERTY_TYPES.map(({ key, label, description, icon: Icon, color }) => (
               <Link
                 key={key}
                 href={`/listings?property_type=${key}`}
@@ -236,8 +255,8 @@ export default function HomePage() {
                     {description}
                   </p>
                 </div>
-                <p className="text-sm font-bold text-primary mt-auto">
-                  {count} listings
+                <p className="text-sm font-semibold text-primary mt-auto inline-flex items-center gap-1">
+                  Browse <ArrowRight className="h-3.5 w-3.5" />
                 </p>
               </Link>
             ))}
@@ -351,10 +370,13 @@ export default function HomePage() {
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {POPULAR_AREAS.map(({ district, name, description, tag }) => (
+            {POPULAR_AREAS.map(({ district, name, description, tag }) => {
+              const guideSlug = guideByDistrict.get(district)
+              const href = guideSlug ? `/guides/${guideSlug}` : `/listings?district=${district}`
+              return (
               <Link
                 key={district}
-                href={`/listings?district=${district}`}
+                href={href}
                 className="group flex items-start gap-4 rounded-xl border border-slate-200 bg-white p-5 hover:border-primary/30 hover:shadow-md transition-all duration-200"
               >
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary text-xs font-bold">
@@ -370,7 +392,8 @@ export default function HomePage() {
                 </div>
                 <ArrowRight className="h-4 w-4 text-slate-300 group-hover:text-primary shrink-0 mt-0.5 transition-colors" />
               </Link>
-            ))}
+              )
+            })}
           </div>
         </div>
       </section>
@@ -437,71 +460,41 @@ export default function HomePage() {
           </div>
 
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {/* Article 1 */}
-            <Link
-              href="/insights/hdb-resale-q1-2026"
-              className="group flex flex-col rounded-xl border border-slate-200 bg-white overflow-hidden hover:shadow-md transition-shadow"
-            >
-              <div className="h-44 bg-gradient-to-br from-blue-100 to-blue-50 flex items-center justify-center">
-                <Building2 className="h-12 w-12 text-blue-300" />
-              </div>
-              <div className="flex flex-col gap-3 p-5">
-                <span className="inline-flex w-fit rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-blue-700">
-                  Market Report
-                </span>
-                <h3 className="font-semibold text-slate-900 group-hover:text-primary transition-colors leading-snug">
-                  Singapore HDB Resale Market Q1 2026 Report
-                </h3>
-                <p className="text-sm text-slate-500 leading-relaxed line-clamp-2">
-                  HDB resale prices rose 3.2% year-on-year in Q1 2026. Mature estates like Bishan, Toa Payoh, and Queenstown led gains.
-                </p>
-                <p className="text-xs text-slate-400 mt-auto">5 min read</p>
-              </div>
-            </Link>
-
-            {/* Article 2 */}
-            <Link
-              href="/insights/5-new-launch-condos-2026"
-              className="group flex flex-col rounded-xl border border-slate-200 bg-white overflow-hidden hover:shadow-md transition-shadow"
-            >
-              <div className="h-44 bg-gradient-to-br from-violet-100 to-violet-50 flex items-center justify-center">
-                <TrendingUp className="h-12 w-12 text-violet-300" />
-              </div>
-              <div className="flex flex-col gap-3 p-5">
-                <span className="inline-flex w-fit rounded-full bg-violet-50 px-2.5 py-0.5 text-xs font-medium text-violet-700">
-                  New Launches
-                </span>
-                <h3 className="font-semibold text-slate-900 group-hover:text-primary transition-colors leading-snug">
-                  5 New Launch Condos to Watch in 2026
-                </h3>
-                <p className="text-sm text-slate-500 leading-relaxed line-clamp-2">
-                  From Lentor Hills to the Greater Southern Waterfront, five projects with the best value propositions launching this year.
-                </p>
-                <p className="text-xs text-slate-400 mt-auto">7 min read</p>
-              </div>
-            </Link>
-
-            {/* Article 3 */}
-            <Link
-              href="/insights/first-time-buyer-guide"
-              className="group flex flex-col rounded-xl border border-slate-200 bg-white overflow-hidden hover:shadow-md transition-shadow"
-            >
-              <div className="h-44 bg-gradient-to-br from-emerald-100 to-emerald-50 flex items-center justify-center">
-                <Home className="h-12 w-12 text-emerald-300" />
-              </div>
-              <div className="flex flex-col gap-3 p-5">
-                <span className="inline-flex w-fit rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-700">
-                  Buyer&apos;s Guide
-                </span>
-                <h3 className="font-semibold text-slate-900 group-hover:text-primary transition-colors leading-snug">
-                  First-time Buyer&apos;s Complete Guide to Singapore Property
-                </h3>
-                <p className="text-sm text-slate-500 leading-relaxed line-clamp-2">
-                  From ABSD to BSD, CPF usage to bank loans — everything you need to know before buying your first home in Singapore.
-                </p>
-                <p className="text-xs text-slate-400 mt-auto">12 min read</p>
-              </div>
-            </Link>
+            {featuredArticles.map((article) => (
+              <Link
+                key={article.slug}
+                href={`/insights/${article.slug}`}
+                className="group flex flex-col rounded-xl border border-slate-200 bg-white overflow-hidden hover:shadow-md transition-shadow"
+              >
+                <div className="relative h-44 bg-slate-100 overflow-hidden">
+                  <Image
+                    src={article.coverImage}
+                    alt={article.title}
+                    fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                </div>
+                <div className="flex flex-col gap-3 p-5">
+                  <span
+                    className={`inline-flex w-fit rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                      CATEGORY_COLORS[article.category] || 'bg-slate-100 text-slate-700'
+                    }`}
+                  >
+                    {CATEGORY_LABELS[article.category] || article.category}
+                  </span>
+                  <h3 className="font-semibold text-slate-900 group-hover:text-primary transition-colors leading-snug">
+                    {article.title}
+                  </h3>
+                  <p className="text-sm text-slate-500 leading-relaxed line-clamp-2">
+                    {article.excerpt}
+                  </p>
+                  <p className="text-xs text-slate-400 mt-auto">
+                    {article.readMinutes} min read
+                  </p>
+                </div>
+              </Link>
+            ))}
           </div>
         </div>
       </section>
@@ -514,7 +507,7 @@ export default function HomePage() {
               <span className="font-semibold text-slate-900">
                 Are you a property agent?
               </span>{' '}
-              List your properties for free and reach thousands of buyers.
+              List your properties free and get instant AI-powered lead responses.
             </p>
             <Link
               href="/for-agents"
