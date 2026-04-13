@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils'
 
 interface AgentContactFormProps {
   agentName: string
+  agentId?: string
   className?: string
 }
 
@@ -20,7 +21,7 @@ interface FormState {
   message: string
 }
 
-export function AgentContactForm({ agentName, className }: AgentContactFormProps) {
+export function AgentContactForm({ agentName, agentId, className }: AgentContactFormProps) {
   const defaultMessage = `Hi ${agentName}, I'd like to learn more about your services.`
 
   const [form, setForm] = useState<FormState>({
@@ -48,11 +49,24 @@ export function AgentContactForm({ agentName, className }: AgentContactFormProps
     e.preventDefault()
     if (!validate()) return
     setSubmitting(true)
-    await new Promise((r) => setTimeout(r, 1000))
-    setSubmitting(false)
-    setSubmitted(true)
-    // eslint-disable-next-line no-console
-    console.log('Agent contact submitted:', form)
+    try {
+      const res = await fetch('/api/lead', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          source: 'agent-contact',
+          agentId,
+          agentName,
+          ...form,
+        }),
+      })
+      if (!res.ok) throw new Error('Submission failed')
+      setSubmitted(true)
+    } catch {
+      setErrors({ message: 'Could not send message. Please try again.' })
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   function handleChange(field: keyof FormState) {

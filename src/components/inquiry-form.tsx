@@ -48,12 +48,24 @@ export function InquiryForm({ listingId, agentName, className, idPrefix = 'inqui
     e.preventDefault()
     if (!validate()) return
     setSubmitting(true)
-    // Simulate network request
-    await new Promise((r) => setTimeout(r, 1000))
-    setSubmitting(false)
-    setSubmitted(true)
-    // eslint-disable-next-line no-console
-    console.log('Inquiry submitted:', { listingId, ...form })
+    try {
+      const res = await fetch('/api/lead', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          source: 'listing-inquiry',
+          listingId,
+          agentName,
+          ...form,
+        }),
+      })
+      if (!res.ok) throw new Error('Submission failed')
+      setSubmitted(true)
+    } catch {
+      setErrors({ message: 'Could not send inquiry. Please try again or call the agent directly.' })
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   function handleChange(field: keyof FormState) {

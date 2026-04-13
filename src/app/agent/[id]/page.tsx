@@ -304,7 +304,7 @@ export default async function AgentProfilePage({ params }: PageProps) {
                 <p className="text-xs text-slate-500">{agent.agency}</p>
               </div>
 
-              <AgentContactForm agentName={agent.name} />
+              <AgentContactForm agentName={agent.name} agentId={agent.id} />
             </div>
           </aside>
 

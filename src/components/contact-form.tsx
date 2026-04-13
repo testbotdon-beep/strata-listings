@@ -49,10 +49,22 @@ export function ContactForm() {
     e.preventDefault()
     if (!validate()) return
     setSubmitting(true)
-    // Simulate network request — replace with real API call
-    await new Promise((r) => setTimeout(r, 1200))
-    setSubmitting(false)
-    setSubmitted(true)
+    try {
+      const res = await fetch('/api/lead', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          source: 'general-contact',
+          ...form,
+        }),
+      })
+      if (!res.ok) throw new Error('Submission failed')
+      setSubmitted(true)
+    } catch {
+      setErrors({ message: 'Could not send message. Please try again.' })
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   function handleChange<K extends keyof FormState>(field: K) {

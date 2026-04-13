@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
+import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 import { Header } from '@/components/layout/header'
 import { Footer } from '@/components/layout/footer'
@@ -15,14 +16,40 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'Strata Listings — Singapore Property',
+  metadataBase: new URL('https://listings.uqlabs.co'),
+  title: {
+    default: 'Strata Listings — Singapore Property',
+    template: '%s | Strata Listings',
+  },
   description:
-    'Find your next home in Singapore. Browse over 10,000 HDB flats, condos, landed homes, and commercial listings across every district.',
+    'Find your next home in Singapore. Browse HDB flats, condos, landed homes, and commercial listings across every district. Verified by licensed CEA agents.',
+  keywords: [
+    'Singapore property',
+    'HDB for sale',
+    'condo for rent',
+    'Singapore real estate',
+    'Singapore property marketplace',
+    'Singapore agents',
+    'PropertyGuru alternative',
+  ],
   openGraph: {
     title: 'Strata Listings — Singapore Property',
     description:
-      'Find your next home in Singapore. Browse over 10,000 verified property listings.',
+      'Find your next home in Singapore. HDB · Condos · Landed · Commercial across all 28 districts.',
+    url: 'https://listings.uqlabs.co',
+    siteName: 'Strata Listings',
     type: 'website',
+    locale: 'en_SG',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Strata Listings — Singapore Property',
+    description:
+      'Find your next home in Singapore. HDB · Condos · Landed · Commercial across all 28 districts.',
+  },
+  robots: {
+    index: true,
+    follow: true,
   },
 }
 
@@ -40,6 +67,7 @@ export default function RootLayout({
         <Header />
         <main className="flex-1">{children}</main>
         <Footer />
+        <Analytics />
       </body>
     </html>
   )
