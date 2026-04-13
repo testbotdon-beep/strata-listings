@@ -32,9 +32,6 @@ export function Header() {
           <span className="text-lg font-bold tracking-tight text-slate-900">
             Strata <span className="text-primary">Listings</span>
           </span>
-          <span className="hidden sm:inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-700 ring-1 ring-amber-200">
-            Beta
-          </span>
         </Link>
 
         {/* Desktop nav */}
