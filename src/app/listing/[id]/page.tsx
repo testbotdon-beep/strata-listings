@@ -393,6 +393,7 @@ export default async function ListingDetailPage({ params }: PageProps) {
                     fill
                     className="object-cover"
                     sizes="56px"
+                    unoptimized
                   />
                 </Link>
                 <div className="min-w-0">

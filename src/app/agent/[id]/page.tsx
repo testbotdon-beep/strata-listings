@@ -110,6 +110,7 @@ export default async function AgentProfilePage({ params }: PageProps) {
                   width={128}
                   height={128}
                   className="h-full w-full object-cover"
+                  unoptimized
                 />
               </div>
               {/* Online indicator */}

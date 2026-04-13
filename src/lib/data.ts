@@ -78,7 +78,7 @@ const LISTINGS: Listing[] = [
     photos: [
       'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&h=600&fit=crop',
       'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&h=600&fit=crop',
-      'https://images.unsplash.com/photo-1616137466211-f736a1b12b24?w=800&h=600&fit=crop',
+      'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&h=600&fit=crop',
       'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&h=600&fit=crop',
     ],
     floor_plan_url: null,
@@ -303,7 +303,7 @@ const LISTINGS: Listing[] = [
       'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800&h=600&fit=crop',
       'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&h=600&fit=crop',
       'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&h=600&fit=crop',
-      'https://images.unsplash.com/photo-1616137466211-f736a1b12b24?w=800&h=600&fit=crop',
+      'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&h=600&fit=crop',
     ],
     floor_plan_url: null,
     furnishing: 'fully',

@@ -57,12 +57,38 @@ export default function NewListingPage() {
     )
   }
 
-  const handleSubmit = (mode: 'draft' | 'published') => {
+  const handleSubmit = async (mode: 'draft' | 'published') => {
     setSubmitMode(mode)
-    // Simulate brief async — would POST to API
-    setTimeout(() => {
-      setSubmitted(true)
-    }, 600)
+    // Capture the form snapshot and log it via /api/lead so Don can see
+    // new listing submissions in Vercel logs. Full persistence to a database
+    // comes with Supabase integration.
+    const formEl = document.querySelector('[data-new-listing-form]') as HTMLElement | null
+    const snapshot: Record<string, string> = {
+      listingType,
+      amenities: selectedAmenities.join(', '),
+    }
+    if (formEl) {
+      formEl.querySelectorAll('input, textarea').forEach((el) => {
+        const input = el as HTMLInputElement | HTMLTextAreaElement
+        const label = input.getAttribute('aria-label') || input.placeholder || input.id || 'field'
+        if (input.value) snapshot[label] = input.value
+      })
+    }
+    try {
+      await fetch('/api/lead', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          source: 'new-listing',
+          name: `Agent submission (${mode})`,
+          email: 'agent@strata-listings.sg',
+          message: `New listing ${mode}. Fields: ${JSON.stringify(snapshot)}`,
+        }),
+      })
+    } catch {
+      // Silent — demo flow still continues
+    }
+    setTimeout(() => setSubmitted(true), 400)
   }
 
   if (submitted) {
@@ -92,7 +118,7 @@ export default function NewListingPage() {
   }
 
   return (
-    <div className="p-6 max-w-4xl mx-auto space-y-8">
+    <div className="p-6 max-w-4xl mx-auto space-y-8" data-new-listing-form>
       {/* Header */}
       <div className="flex items-center gap-3">
         <Button variant="ghost" size="icon-sm" render={<Link href="/dashboard/listings" />}>
