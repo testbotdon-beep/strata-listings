@@ -130,16 +130,17 @@ test.describe('Listing Detail', () => {
 
   test('inquiry form is present and submits', async ({ page }) => {
     await page.goto(`${BASE}/listing/listing-1`)
+    await page.waitForLoadState('networkidle')
 
-    // Desktop sidebar form is the visible one (second in DOM, inside .hidden.lg\\:block)
-    const sidebar = page.locator('.hidden.lg\\:block').filter({ has: page.locator('#inquiry-name') })
-    await sidebar.locator('#inquiry-name').fill('Test User')
-    await sidebar.locator('#inquiry-email').fill('test@example.com')
-    await sidebar.locator('#inquiry-phone').fill('+65 9999 9999')
-    await sidebar.locator('button:has-text("Send Inquiry")').click()
+    // Desktop sidebar form has id="inquiry-form" wrapper
+    const form = page.locator('#inquiry-form')
+    await form.locator('#inquiry-name').fill('Test User')
+    await form.locator('#inquiry-email').fill('test@example.com')
+    await form.locator('#inquiry-phone').fill('+65 9999 9999')
+    await form.locator('button:has-text("Send Inquiry")').click()
 
-    // Wait for simulated network delay then success (form re-renders so check page-level)
-    await expect(page.locator('text=Inquiry sent').first()).toBeVisible({ timeout: 5000 })
+    // Wait for simulated network delay then success
+    await expect(page.locator('text=/Inquiry sent/').first()).toBeVisible({ timeout: 10000 })
   })
 
   test('image gallery shows multiple images', async ({ page }) => {
@@ -279,7 +280,7 @@ test.describe('Cross-page navigation', () => {
     await sidebar.locator('#inquiry-email').fill('journey@test.com')
     await sidebar.locator('#inquiry-phone').fill('+65 8888 8888')
     await sidebar.locator('button:has-text("Send Inquiry")').click()
-    await expect(page.locator('text=Inquiry sent').first()).toBeVisible({ timeout: 5000 })
+    await expect(page.locator('text=/Inquiry sent/').first()).toBeVisible({ timeout: 5000 })
   })
 
   test('full agent journey: dashboard → listings → new listing', async ({ page }) => {

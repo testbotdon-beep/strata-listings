@@ -10,8 +10,9 @@ const NAV_LINKS = [
   { label: 'Buy', href: '/listings?type=sale' },
   { label: 'Rent', href: '/listings?type=rent' },
   { label: 'New Launches', href: '/listings?sort=newest' },
-  { label: 'Commercial', href: '/listings?property_type=commercial' },
-  { label: 'Agents', href: '/for-agents' },
+  { label: 'Calculators', href: '/calculators' },
+  { label: 'Guides', href: '/guides' },
+  { label: 'Insights', href: '/insights' },
 ]
 
 export function Header() {
@@ -48,14 +49,22 @@ export function Header() {
 
         {/* Desktop right side */}
         <div className="hidden md:flex items-center gap-2">
-          {/* Saved — placeholder */}
-          <button
-            type="button"
+          {/* For Agents — subtle text link */}
+          <Link
+            href="/for-agents"
+            className="rounded-md px-3 py-2 text-sm font-medium text-slate-500 transition-colors hover:text-slate-900"
+          >
+            For Agents
+          </Link>
+
+          {/* Saved */}
+          <Link
+            href="/saved"
             aria-label="Saved properties"
             className="flex size-9 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-900"
           >
             <Heart className="size-4" />
-          </button>
+          </Link>
 
           {/* List Your Property CTA */}
           <Button
@@ -103,6 +112,21 @@ export function Header() {
                     {label}
                   </Link>
                 ))}
+                <Link
+                  href="/for-agents"
+                  onClick={() => setOpen(false)}
+                  className="rounded-md px-3 py-2.5 text-sm font-medium text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-900"
+                >
+                  For Agents
+                </Link>
+                <Link
+                  href="/saved"
+                  onClick={() => setOpen(false)}
+                  className="rounded-md px-3 py-2.5 text-sm font-medium text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-900 flex items-center gap-2"
+                >
+                  <Heart className="size-4" />
+                  Saved properties
+                </Link>
                 <div className="mt-3 border-t border-slate-200/60 pt-3">
                   <Button
                     className="w-full"

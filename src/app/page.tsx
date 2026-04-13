@@ -6,6 +6,9 @@ import {
   Briefcase,
   ArrowRight,
   TrendingUp,
+  Shield,
+  Users,
+  Award,
 } from 'lucide-react'
 import { getFeaturedListings, getListings } from '@/lib/data'
 import { ListingCard } from '@/components/listing-card'
@@ -242,6 +245,70 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ─── Why Strata Listings ───────────────────────────────────── */}
+      <section className="py-16 sm:py-20">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="mb-10 text-center">
+            <h2 className="text-2xl font-bold text-slate-900 sm:text-3xl">
+              Why Strata Listings
+            </h2>
+            <p className="mt-2 text-sm text-slate-500 max-w-md mx-auto">
+              Built differently from the start.
+            </p>
+          </div>
+
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-6 hover:shadow-md transition-shadow">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                <Shield className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="font-semibold text-slate-900">Verified listings</p>
+                <p className="mt-1.5 text-sm text-slate-500 leading-relaxed">
+                  Every listing checked against CEA data. No duplicates, no ghost listings.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-6 hover:shadow-md transition-shadow">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+                <TrendingUp className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="font-semibold text-slate-900">Real-time prices</p>
+                <p className="mt-1.5 text-sm text-slate-500 leading-relaxed">
+                  Based on URA data and live market rates. Know what&apos;s fair before you call.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-6 hover:shadow-md transition-shadow">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-violet-50 text-violet-600">
+                <Users className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="font-semibold text-slate-900">Direct to agents</p>
+                <p className="mt-1.5 text-sm text-slate-500 leading-relaxed">
+                  No middleman. No hidden fees. Connect directly with the listing agent.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-6 hover:shadow-md transition-shadow">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
+                <Award className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="font-semibold text-slate-900">Tools &amp; insights</p>
+                <p className="mt-1.5 text-sm text-slate-500 leading-relaxed">
+                  Calculators, district guides, market reports. Everything to make the right call.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ─── New Launches ──────────────────────────────────────────── */}
       <section className="py-16 sm:py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -343,6 +410,98 @@ export default function HomePage() {
                 <p className="mt-1 text-xs text-slate-400">{source}</p>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ─── From Our Insights ─────────────────────────────────────── */}
+      {/* TODO: add insights preview once articles lib is ready */}
+      <section className="bg-slate-50/70 py-16 sm:py-20">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="mb-8 flex items-end justify-between gap-4">
+            <div>
+              <h2 className="text-2xl font-bold text-slate-900 sm:text-3xl">
+                From our insights
+              </h2>
+              <p className="mt-1 text-sm text-slate-500">
+                Market analysis and guides for Singapore property buyers
+              </p>
+            </div>
+            <Link
+              href="/insights"
+              className="flex shrink-0 items-center gap-1 text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+            >
+              View all articles
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {/* Article 1 */}
+            <Link
+              href="/insights/hdb-resale-q1-2026"
+              className="group flex flex-col rounded-xl border border-slate-200 bg-white overflow-hidden hover:shadow-md transition-shadow"
+            >
+              <div className="h-44 bg-gradient-to-br from-blue-100 to-blue-50 flex items-center justify-center">
+                <Building2 className="h-12 w-12 text-blue-300" />
+              </div>
+              <div className="flex flex-col gap-3 p-5">
+                <span className="inline-flex w-fit rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-blue-700">
+                  Market Report
+                </span>
+                <h3 className="font-semibold text-slate-900 group-hover:text-primary transition-colors leading-snug">
+                  Singapore HDB Resale Market Q1 2026 Report
+                </h3>
+                <p className="text-sm text-slate-500 leading-relaxed line-clamp-2">
+                  HDB resale prices rose 3.2% year-on-year in Q1 2026. Mature estates like Bishan, Toa Payoh, and Queenstown led gains.
+                </p>
+                <p className="text-xs text-slate-400 mt-auto">5 min read</p>
+              </div>
+            </Link>
+
+            {/* Article 2 */}
+            <Link
+              href="/insights/5-new-launch-condos-2026"
+              className="group flex flex-col rounded-xl border border-slate-200 bg-white overflow-hidden hover:shadow-md transition-shadow"
+            >
+              <div className="h-44 bg-gradient-to-br from-violet-100 to-violet-50 flex items-center justify-center">
+                <TrendingUp className="h-12 w-12 text-violet-300" />
+              </div>
+              <div className="flex flex-col gap-3 p-5">
+                <span className="inline-flex w-fit rounded-full bg-violet-50 px-2.5 py-0.5 text-xs font-medium text-violet-700">
+                  New Launches
+                </span>
+                <h3 className="font-semibold text-slate-900 group-hover:text-primary transition-colors leading-snug">
+                  5 New Launch Condos to Watch in 2026
+                </h3>
+                <p className="text-sm text-slate-500 leading-relaxed line-clamp-2">
+                  From Lentor Hills to the Greater Southern Waterfront, five projects with the best value propositions launching this year.
+                </p>
+                <p className="text-xs text-slate-400 mt-auto">7 min read</p>
+              </div>
+            </Link>
+
+            {/* Article 3 */}
+            <Link
+              href="/insights/first-time-buyer-guide"
+              className="group flex flex-col rounded-xl border border-slate-200 bg-white overflow-hidden hover:shadow-md transition-shadow"
+            >
+              <div className="h-44 bg-gradient-to-br from-emerald-100 to-emerald-50 flex items-center justify-center">
+                <Home className="h-12 w-12 text-emerald-300" />
+              </div>
+              <div className="flex flex-col gap-3 p-5">
+                <span className="inline-flex w-fit rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-700">
+                  Buyer&apos;s Guide
+                </span>
+                <h3 className="font-semibold text-slate-900 group-hover:text-primary transition-colors leading-snug">
+                  First-time Buyer&apos;s Complete Guide to Singapore Property
+                </h3>
+                <p className="text-sm text-slate-500 leading-relaxed line-clamp-2">
+                  From ABSD to BSD, CPF usage to bank loans — everything you need to know before buying your first home in Singapore.
+                </p>
+                <p className="text-xs text-slate-400 mt-auto">12 min read</p>
+              </div>
+            </Link>
           </div>
         </div>
       </section>

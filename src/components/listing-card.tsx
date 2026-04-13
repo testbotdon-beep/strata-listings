@@ -1,3 +1,5 @@
+'use client'
+
 import Image from 'next/image'
 import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
@@ -7,6 +9,7 @@ import { Bed, Bath, Maximize, MapPin } from 'lucide-react'
 import type { Listing } from '@/types/listing'
 import { formatPrice } from '@/lib/data'
 import { cn } from '@/lib/utils'
+import { FavoriteButton } from '@/components/favorite-button'
 
 interface ListingCardProps {
   listing: Listing
@@ -73,14 +76,15 @@ export function ListingCard({ listing, className }: ListingCardProps) {
             </span>
           </div>
 
-          {/* Featured badge — top right */}
-          {featured && (
-            <div className="absolute right-3 top-3">
+          {/* Featured badge + favorite — top right */}
+          <div className="absolute right-2 top-2 flex items-center gap-1.5">
+            {featured && (
               <span className="inline-flex items-center rounded-full bg-amber-400/95 px-2.5 py-1 text-xs font-semibold text-amber-900 shadow-sm">
                 Featured
               </span>
-            </div>
-          )}
+            )}
+            <FavoriteButton listingId={id} variant="floating" />
+          </div>
         </div>
 
         {/* Body */}
@@ -134,7 +138,11 @@ export function ListingCard({ listing, className }: ListingCardProps) {
           <div className="h-px bg-slate-100" />
 
           {/* Agent row */}
-          <div className="flex min-w-0 items-center gap-2">
+          <Link
+            href={`/agent/${agent.id}`}
+            onClick={(e) => e.stopPropagation()}
+            className="flex min-w-0 items-center gap-2 rounded-lg p-1 -m-1 hover:bg-slate-50 transition-colors"
+          >
             <Avatar size="sm">
               <AvatarImage src={agent.photo_url} alt={agent.name} />
               <AvatarFallback>{agentInitials}</AvatarFallback>
@@ -147,7 +155,7 @@ export function ListingCard({ listing, className }: ListingCardProps) {
                 {agent.agency}
               </p>
             </div>
-          </div>
+          </Link>
         </div>
       </Card>
     </Link>

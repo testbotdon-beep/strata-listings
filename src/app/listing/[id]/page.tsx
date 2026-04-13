@@ -14,16 +14,17 @@ import {
   Building2,
   ChevronLeft,
   Share2,
-  Heart,
   Clock,
   Star,
 } from 'lucide-react'
-import { getListingById, formatPriceFull } from '@/lib/data'
+import { getListingById, getListings, formatPriceFull } from '@/lib/data'
 import { LISTING_TYPE_LABELS, SG_DISTRICTS, PROPERTY_TYPE_LABELS, FURNISHING_LABELS } from '@/types/listing'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { ImageGallery } from '@/components/image-gallery'
 import { InquiryForm } from '@/components/inquiry-form'
+import { FavoriteButton } from '@/components/favorite-button'
+import { ListingCard } from '@/components/listing-card'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -112,8 +113,53 @@ export default async function ListingDetailPage({ params }: PageProps) {
     year: 'numeric',
   })
 
+  // Similar listings: same type + district, excluding current. Pad with same type if needed.
+  const sameDistrictAndType = getListings({
+    property_type: listing.property_type,
+    district: listing.district,
+  }).filter((l) => l.id !== id)
+
+  const similarListings = sameDistrictAndType.length >= 3
+    ? sameDistrictAndType.slice(0, 3)
+    : [
+        ...sameDistrictAndType,
+        ...getListings({ property_type: listing.property_type })
+          .filter((l) => l.id !== id && !sameDistrictAndType.some((s) => s.id === l.id))
+          .slice(0, 3 - sameDistrictAndType.length),
+      ]
+
+  // Mortgage helper — 25yr, 75% LTV, 3.5% p.a.
+  function monthlyMortgage(p: number): number {
+    const principal = p * 0.75
+    const r = 0.035 / 12
+    const n = 300
+    return (principal * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1)
+  }
+
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: listing.title,
+    description: listing.description.slice(0, 200),
+    image: listing.photos[0],
+    offers: {
+      '@type': 'Offer',
+      price: listing.price,
+      priceCurrency: 'SGD',
+      availability: 'https://schema.org/InStock',
+    },
+    brand: {
+      '@type': 'RealEstateAgent',
+      name: listing.agent.name,
+    },
+  }
+
   return (
     <div className="min-h-screen bg-background">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         {/* Back breadcrumb */}
         <div className="mb-5">
@@ -171,13 +217,7 @@ export default async function ListingDetailPage({ params }: PageProps) {
                   >
                     <Share2 className="h-4 w-4" />
                   </button>
-                  <button
-                    type="button"
-                    className="flex h-9 w-9 items-center justify-center rounded-lg border border-border text-muted-foreground hover:text-destructive hover:bg-destructive/5 transition-colors"
-                    aria-label="Save listing"
-                  >
-                    <Heart className="h-4 w-4" />
-                  </button>
+                  <FavoriteButton listingId={id} variant="inline" />
                 </div>
               </div>
 
@@ -306,6 +346,29 @@ export default async function ListingDetailPage({ params }: PageProps) {
               </>
             )}
 
+            {/* Similar listings */}
+            {similarListings.length > 0 && (
+              <>
+                <Separator />
+                <section>
+                  <h2 className="text-lg font-semibold text-slate-900 mb-1">
+                    Similar properties
+                  </h2>
+                  <p className="text-sm text-slate-500 mb-4">
+                    More {PROPERTY_TYPE_LABELS[listing.property_type]} in{' '}
+                    {SG_DISTRICTS[listing.district]
+                      ? `D${listing.district} — ${SG_DISTRICTS[listing.district]}`
+                      : `District ${listing.district}`}
+                  </p>
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    {similarListings.map((similar) => (
+                      <ListingCard key={similar.id} listing={similar} />
+                    ))}
+                  </div>
+                </section>
+              </>
+            )}
+
             <Separator />
 
             {/* Inquiry form (mobile) */}
@@ -323,7 +386,7 @@ export default async function ListingDetailPage({ params }: PageProps) {
             <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sticky top-20">
               {/* Agent info */}
               <div className="flex items-start gap-4 mb-4">
-                <div className="relative h-14 w-14 rounded-full overflow-hidden bg-slate-100 shrink-0 ring-2 ring-slate-100">
+                <Link href={`/agent/${agent.id}`} className="relative h-14 w-14 rounded-full overflow-hidden bg-slate-100 shrink-0 ring-2 ring-slate-100 hover:ring-slate-300 transition-all">
                   <Image
                     src={agent.photo_url}
                     alt={agent.name}
@@ -331,14 +394,27 @@ export default async function ListingDetailPage({ params }: PageProps) {
                     className="object-cover"
                     sizes="56px"
                   />
-                </div>
+                </Link>
                 <div className="min-w-0">
-                  <p className="font-semibold text-slate-900 leading-tight">{agent.name}</p>
+                  <Link
+                    href={`/agent/${agent.id}`}
+                    className="font-semibold text-slate-900 leading-tight hover:text-primary transition-colors"
+                  >
+                    {agent.name}
+                  </Link>
                   <p className="text-xs text-slate-500 mt-0.5">{agent.agency}</p>
                   <p className="text-xs text-slate-500">CEA: {agent.license_no}</p>
-                  <span className="inline-flex items-center rounded-full bg-slate-100 mt-1.5 px-2 py-0.5 text-[10px] font-medium text-slate-500">
-                    {agent.listings_count} listings
-                  </span>
+                  <div className="flex items-center gap-2 mt-1.5">
+                    <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-500">
+                      {agent.listings_count} listings
+                    </span>
+                    <Link
+                      href={`/agent/${agent.id}`}
+                      className="text-[10px] font-medium text-primary hover:text-primary/80 transition-colors"
+                    >
+                      View profile →
+                    </Link>
+                  </div>
                 </div>
               </div>
 
@@ -385,6 +461,30 @@ export default async function ListingDetailPage({ params }: PageProps) {
                 </Link>
               </div>
             </div>
+
+            {/* Mortgage estimate card (sale only) */}
+            {type === 'sale' && (
+              <div className="rounded-xl border border-slate-200 bg-white p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <svg className="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 11h.01M12 11h.01M15 11h.01M4 19h16a2 2 0 002-2V7a2 2 0 00-2-2H4a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                  <p className="text-sm font-semibold text-slate-900">Mortgage estimate</p>
+                </div>
+                <p className="text-2xl font-bold text-slate-900 mb-0.5">
+                  Est. ${Math.round(monthlyMortgage(price)).toLocaleString()}/month
+                </p>
+                <p className="text-xs text-slate-500 leading-relaxed mb-3">
+                  25-year loan at 3.5% interest, 75% LTV
+                </p>
+                <Link
+                  href={`/calculators/mortgage?price=${price}`}
+                  className="text-xs font-medium text-primary hover:text-primary/80 transition-colors"
+                >
+                  Calculate in detail →
+                </Link>
+              </div>
+            )}
 
             {/* Book a viewing card */}
             <div className="rounded-xl border border-slate-200 bg-white p-4">
