@@ -77,8 +77,7 @@ export function InquiryForm({ listingId, agentName, className, idPrefix = 'inqui
             Inquiry sent!
           </h3>
           <p className="mt-1.5 text-sm text-muted-foreground">
-            {agentName} will get back to you shortly. If they are on Strata AI,
-            expect a response in under 5 seconds.
+            Your inquiry will be sent directly to the agent. {agentName} will be in touch shortly.
           </p>
         </div>
         <button

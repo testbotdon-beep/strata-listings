@@ -17,11 +17,11 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: 'Strata Listings — Singapore Property',
   description:
-    'Find your next home in Singapore. Browse thousands of verified HDB, condo, landed, and commercial listings with AI-powered agent support.',
+    'Find your next home in Singapore. Browse over 10,000 HDB flats, condos, landed homes, and commercial listings across every district.',
   openGraph: {
     title: 'Strata Listings — Singapore Property',
     description:
-      'Find your next home in Singapore. Browse thousands of verified property listings.',
+      'Find your next home in Singapore. Browse over 10,000 verified property listings.',
     type: 'website',
   },
 }

@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
-import { Bed, Bath, Maximize, Zap, MapPin } from 'lucide-react'
+import { Bed, Bath, Maximize, MapPin } from 'lucide-react'
 import type { Listing } from '@/types/listing'
 import { formatPrice } from '@/lib/data'
 import { cn } from '@/lib/utils'
@@ -38,8 +38,16 @@ export function ListingCard({ listing, className }: ListingCardProps) {
     .toUpperCase()
 
   return (
-    <Link href={`/listing/${id}`} className="group block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-xl">
-      <Card className={cn('overflow-hidden p-0 gap-0 transition-shadow duration-200 hover:shadow-lg hover:shadow-black/8', className)}>
+    <Link
+      href={`/listing/${id}`}
+      className="group block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-xl"
+    >
+      <Card
+        className={cn(
+          'overflow-hidden p-0 gap-0 transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5',
+          className
+        )}
+      >
         {/* Photo */}
         <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">
           <Image
@@ -57,8 +65,8 @@ export function ListingCard({ listing, className }: ListingCardProps) {
               className={cn(
                 'inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold shadow-sm',
                 type === 'sale'
-                  ? 'bg-primary text-white'
-                  : 'bg-emerald-500 text-white'
+                  ? 'bg-slate-900/90 text-white'
+                  : 'bg-emerald-500/95 text-white'
               )}
             >
               {type === 'sale' ? 'For Sale' : 'For Rent'}
@@ -78,16 +86,16 @@ export function ListingCard({ listing, className }: ListingCardProps) {
         {/* Body */}
         <div className="flex flex-col gap-3 px-4 pb-4 pt-3">
           {/* Price */}
-          <p className="text-xl font-bold text-foreground">
+          <p className="text-xl font-bold text-slate-900">
             {formatPrice(price, type)}
           </p>
 
-          {/* Title */}
+          {/* Title + address */}
           <div className="flex flex-col gap-1">
-            <h3 className="line-clamp-1 text-sm font-semibold text-foreground leading-snug">
+            <h3 className="line-clamp-1 text-sm font-semibold text-slate-800 leading-snug">
               {title}
             </h3>
-            <p className="flex items-center gap-1 text-xs text-muted-foreground">
+            <p className="flex items-center gap-1 text-xs text-slate-500">
               <MapPin className="size-3 shrink-0" />
               <span className="line-clamp-1">{address}</span>
             </p>
@@ -95,55 +103,50 @@ export function ListingCard({ listing, className }: ListingCardProps) {
 
           {/* Stats row */}
           {property_type !== 'commercial' ? (
-            <div className="flex items-center gap-3 text-xs text-muted-foreground">
+            <div className="flex items-center gap-3 text-xs text-slate-500">
               <span className="flex items-center gap-1">
                 <Bed className="size-3.5 shrink-0" />
-                <span>{bedrooms} bed{bedrooms !== 1 ? 's' : ''}</span>
+                <span>
+                  {bedrooms} bed{bedrooms !== 1 ? 's' : ''}
+                </span>
               </span>
-              <span className="text-border">|</span>
+              <span className="text-slate-300">|</span>
               <span className="flex items-center gap-1">
                 <Bath className="size-3.5 shrink-0" />
-                <span>{bathrooms} bath{bathrooms !== 1 ? 's' : ''}</span>
+                <span>
+                  {bathrooms} bath{bathrooms !== 1 ? 's' : ''}
+                </span>
               </span>
-              <span className="text-border">|</span>
+              <span className="text-slate-300">|</span>
               <span className="flex items-center gap-1">
                 <Maximize className="size-3.5 shrink-0" />
                 <span>{sqft.toLocaleString()} sqft</span>
               </span>
             </div>
           ) : (
-            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+            <div className="flex items-center gap-1 text-xs text-slate-500">
               <Maximize className="size-3.5 shrink-0" />
               <span>{sqft.toLocaleString()} sqft</span>
             </div>
           )}
 
           {/* Divider */}
-          <div className="h-px bg-border/60" />
+          <div className="h-px bg-slate-100" />
 
-          {/* Agent mini card */}
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex min-w-0 items-center gap-2">
-              <Avatar size="sm">
-                <AvatarImage src={agent.photo_url} alt={agent.name} />
-                <AvatarFallback>{agentInitials}</AvatarFallback>
-              </Avatar>
-              <div className="min-w-0">
-                <p className="truncate text-xs font-medium text-foreground">
-                  {agent.name}
-                </p>
-                <p className="truncate text-[10px] text-muted-foreground">
-                  {agent.agency}
-                </p>
-              </div>
+          {/* Agent row */}
+          <div className="flex min-w-0 items-center gap-2">
+            <Avatar size="sm">
+              <AvatarImage src={agent.photo_url} alt={agent.name} />
+              <AvatarFallback>{agentInitials}</AvatarFallback>
+            </Avatar>
+            <div className="min-w-0">
+              <p className="truncate text-xs font-medium text-slate-700">
+                {agent.name}
+              </p>
+              <p className="truncate text-[10px] text-slate-500">
+                {agent.agency}
+              </p>
             </div>
-
-            {agent.strata_agent_id && (
-              <span className="flex shrink-0 items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-700 ring-1 ring-emerald-200">
-                <Zap className="size-2.5" />
-                Responds &lt;5s
-              </span>
-            )}
           </div>
         </div>
       </Card>

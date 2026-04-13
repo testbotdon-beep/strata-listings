@@ -6,13 +6,13 @@ const BASE = 'http://localhost:3000'
 test.describe('Homepage', () => {
   test('renders hero, search, featured, property types, popular areas, CTA', async ({ page }) => {
     await page.goto(BASE)
-    await expect(page.locator('text=Find Your Perfect Home')).toBeVisible()
+    await expect(page.locator('text=/Find a home/')).toBeVisible()
     await expect(page.locator('input[placeholder*="Search"], input[placeholder*="search"], input[placeholder*="location"]').first()).toBeVisible()
-    await expect(page.locator('text=Featured Properties')).toBeVisible()
-    await expect(page.locator('text=Browse by Property Type')).toBeVisible()
+    await expect(page.locator('text=/Featured properties/i').first()).toBeVisible()
+    await expect(page.locator('text=/Browse by property type/i').first()).toBeVisible()
     await expect(page.locator('text=HDB').first()).toBeVisible()
-    await expect(page.locator('text=Popular Neigh').first()).toBeVisible()
-    await expect(page.locator('text=property agent').first()).toBeVisible()
+    await expect(page.locator('text=/Popular neighbourhoods/i').first()).toBeVisible()
+    await expect(page.locator('text=/property agent/i').first()).toBeVisible()
   })
 
   test('header nav links work', async ({ page }) => {
@@ -26,11 +26,12 @@ test.describe('Homepage', () => {
     await expect(page).toHaveURL(/type=rent/)
   })
 
-  test('List Your Property button navigates to dashboard', async ({ page }) => {
+  test('List Your Property button navigates to for-agents or dashboard', async ({ page }) => {
     await page.goto(BASE)
     const cta = page.locator('a:has-text("List Your Property")').first()
     await cta.click()
-    await expect(page).toHaveURL(/dashboard/)
+    // Either /for-agents (landing) or /dashboard (logged-in flow)
+    await expect(page).toHaveURL(/for-agents|dashboard/)
   })
 
   test('featured listing cards link to detail page', async ({ page }) => {
@@ -244,7 +245,7 @@ test.describe('Mobile', () => {
 
   test('homepage renders on mobile', async ({ page }) => {
     await page.goto(BASE)
-    await expect(page.locator('text=Find Your Perfect Home')).toBeVisible()
+    await expect(page.locator('text=/Find a home/')).toBeVisible()
     await expect(page.locator('text=Featured Properties')).toBeVisible()
   })
 
@@ -265,7 +266,7 @@ test.describe('Mobile', () => {
 test.describe('Cross-page navigation', () => {
   test('full user journey: home → listing → inquiry', async ({ page }) => {
     await page.goto(BASE)
-    await expect(page.locator('text=Find Your Perfect Home')).toBeVisible()
+    await expect(page.locator('text=/Find a home/')).toBeVisible()
 
     const card = page.locator('a[href^="/listing/"]').first()
     await card.click()

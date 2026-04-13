@@ -9,7 +9,6 @@ import {
   MapPin,
   Phone,
   Mail,
-  Zap,
   Calendar,
   Shield,
   Building2,
@@ -142,8 +141,8 @@ export default async function ListingDetailPage({ params }: PageProps) {
                     <span
                       className={
                         type === 'rent'
-                          ? 'inline-flex items-center rounded-full bg-blue-500 px-2.5 py-0.5 text-xs font-semibold text-white'
-                          : 'inline-flex items-center rounded-full bg-emerald-500 px-2.5 py-0.5 text-xs font-semibold text-white'
+                          ? 'inline-flex items-center rounded-full bg-emerald-500 px-2.5 py-0.5 text-xs font-semibold text-white'
+                          : 'inline-flex items-center rounded-full bg-slate-900 px-2.5 py-0.5 text-xs font-semibold text-white'
                       }
                     >
                       {LISTING_TYPE_LABELS[type]}
@@ -151,19 +150,13 @@ export default async function ListingDetailPage({ params }: PageProps) {
                     <Badge variant="secondary">
                       {PROPERTY_TYPE_LABELS[property_type]}
                     </Badge>
-                    {agent.strata_agent_id && (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary ring-1 ring-primary/20">
-                        <Zap className="h-3 w-3" />
-                        Responds in &lt;5s
-                      </span>
-                    )}
                   </div>
 
-                  <h1 className="text-2xl font-bold text-foreground sm:text-3xl leading-tight">
+                  <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl leading-tight">
                     {title}
                   </h1>
 
-                  <div className="mt-2 flex items-center gap-1.5 text-sm text-muted-foreground">
+                  <div className="mt-2 flex items-center gap-1.5 text-sm text-slate-500">
                     <MapPin className="h-4 w-4 shrink-0" />
                     <span>{address}</span>
                   </div>
@@ -190,47 +183,47 @@ export default async function ListingDetailPage({ params }: PageProps) {
 
               {/* Price */}
               <div className="mt-5 flex flex-wrap items-baseline gap-3">
-                <p className="text-3xl font-bold text-foreground sm:text-4xl">
+                <p className="text-3xl font-bold text-slate-900 sm:text-4xl">
                   {formatPriceFull(price, type)}
                 </p>
                 {listing.price_psf && (
-                  <p className="text-base text-muted-foreground">
+                  <p className="text-base text-slate-500">
                     ${listing.price_psf.toLocaleString()} psf
                   </p>
                 )}
               </div>
 
               {/* Key stats */}
-              <div className="mt-5 flex flex-wrap items-center gap-5 rounded-xl bg-muted/50 px-5 py-4">
+              <div className="mt-5 flex flex-wrap items-center gap-5 rounded-xl bg-slate-50 px-5 py-4">
                 {bedrooms > 0 && (
                   <div className="flex items-center gap-2">
                     <Bed className="h-5 w-5 text-primary" />
                     <div>
-                      <p className="text-base font-semibold text-foreground">{bedrooms}</p>
-                      <p className="text-xs text-muted-foreground">Bedroom{bedrooms !== 1 ? 's' : ''}</p>
+                      <p className="text-base font-semibold text-slate-900">{bedrooms}</p>
+                      <p className="text-xs text-slate-500">Bedroom{bedrooms !== 1 ? 's' : ''}</p>
                     </div>
                   </div>
                 )}
                 <div className="flex items-center gap-2">
                   <Bath className="h-5 w-5 text-primary" />
                   <div>
-                    <p className="text-base font-semibold text-foreground">{bathrooms}</p>
-                    <p className="text-xs text-muted-foreground">Bathroom{bathrooms !== 1 ? 's' : ''}</p>
+                    <p className="text-base font-semibold text-slate-900">{bathrooms}</p>
+                    <p className="text-xs text-slate-500">Bathroom{bathrooms !== 1 ? 's' : ''}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <Maximize className="h-5 w-5 text-primary" />
                   <div>
-                    <p className="text-base font-semibold text-foreground">{sqft.toLocaleString()}</p>
-                    <p className="text-xs text-muted-foreground">sqft</p>
+                    <p className="text-base font-semibold text-slate-900">{sqft.toLocaleString()}</p>
+                    <p className="text-xs text-slate-500">sqft</p>
                   </div>
                 </div>
                 {floor_level && (
                   <div className="flex items-center gap-2">
                     <Building2 className="h-5 w-5 text-primary" />
                     <div>
-                      <p className="text-base font-semibold text-foreground">{floor_level}</p>
-                      <p className="text-xs text-muted-foreground">Floor</p>
+                      <p className="text-base font-semibold text-slate-900">{floor_level}</p>
+                      <p className="text-xs text-slate-500">Floor</p>
                     </div>
                   </div>
                 )}
@@ -238,15 +231,15 @@ export default async function ListingDetailPage({ params }: PageProps) {
                   <div className="flex items-center gap-2">
                     <Shield className="h-5 w-5 text-primary" />
                     <div>
-                      <p className="text-base font-semibold text-foreground">{tenure.split(' ')[0]}</p>
-                      <p className="text-xs text-muted-foreground">Tenure</p>
+                      <p className="text-base font-semibold text-slate-900">{tenure.split(' ')[0]}</p>
+                      <p className="text-xs text-slate-500">Tenure</p>
                     </div>
                   </div>
                 )}
               </div>
 
               {/* Meta info */}
-              <div className="mt-3 flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
+              <div className="mt-3 flex flex-wrap items-center gap-4 text-xs text-slate-400">
                 <span className="flex items-center gap-1.5">
                   <Clock className="h-3.5 w-3.5" />
                   Listed {listedDate}
@@ -262,12 +255,12 @@ export default async function ListingDetailPage({ params }: PageProps) {
 
             {/* Description */}
             <section>
-              <h2 className="text-lg font-semibold text-foreground mb-4">
+              <h2 className="text-lg font-semibold text-slate-900 mb-4">
                 About this property
               </h2>
               <div className="flex flex-col gap-3">
                 {descParagraphs.map((para, i) => (
-                  <p key={i} className="text-sm text-muted-foreground leading-relaxed">
+                  <p key={i} className="text-sm text-slate-600 leading-relaxed">
                     {para}
                   </p>
                 ))}
@@ -278,17 +271,17 @@ export default async function ListingDetailPage({ params }: PageProps) {
 
             {/* Details grid */}
             <section>
-              <h2 className="text-lg font-semibold text-foreground mb-4">
+              <h2 className="text-lg font-semibold text-slate-900 mb-4">
                 Property details
               </h2>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {detailItems.map(({ label, value }) => (
                   <div
                     key={label}
-                    className="flex items-start justify-between rounded-lg bg-muted/40 px-4 py-3 gap-4"
+                    className="flex items-start justify-between rounded-lg bg-slate-50 px-4 py-3 gap-4"
                   >
-                    <span className="text-sm text-muted-foreground shrink-0">{label}</span>
-                    <span className="text-sm font-medium text-foreground text-right">{value}</span>
+                    <span className="text-sm text-slate-500 shrink-0">{label}</span>
+                    <span className="text-sm font-medium text-slate-900 text-right">{value}</span>
                   </div>
                 ))}
               </div>
@@ -299,7 +292,7 @@ export default async function ListingDetailPage({ params }: PageProps) {
               <>
                 <Separator />
                 <section>
-                  <h2 className="text-lg font-semibold text-foreground mb-4">
+                  <h2 className="text-lg font-semibold text-slate-900 mb-4">
                     Amenities &amp; facilities
                   </h2>
                   <div className="flex flex-wrap gap-2">
@@ -315,9 +308,9 @@ export default async function ListingDetailPage({ params }: PageProps) {
 
             <Separator />
 
-            {/* Inquiry form (mobile — shown below main content on small screens) */}
+            {/* Inquiry form (mobile) */}
             <section className="lg:hidden" id="inquiry-form-mobile">
-              <h2 className="text-lg font-semibold text-foreground mb-4">
+              <h2 className="text-lg font-semibold text-slate-900 mb-4">
                 Contact agent
               </h2>
               <InquiryForm listingId={id} agentName={agent.name} idPrefix="mobile-inquiry" />
@@ -327,10 +320,10 @@ export default async function ListingDetailPage({ params }: PageProps) {
           {/* ── Right / Sidebar column ── */}
           <aside className="lg:col-span-1 flex flex-col gap-5">
             {/* Agent card */}
-            <div className="rounded-2xl border border-border bg-white p-5 shadow-sm sticky top-20">
+            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sticky top-20">
               {/* Agent info */}
               <div className="flex items-start gap-4 mb-4">
-                <div className="relative h-14 w-14 rounded-full overflow-hidden bg-muted shrink-0 ring-2 ring-border">
+                <div className="relative h-14 w-14 rounded-full overflow-hidden bg-slate-100 shrink-0 ring-2 ring-slate-100">
                   <Image
                     src={agent.photo_url}
                     alt={agent.name}
@@ -340,22 +333,12 @@ export default async function ListingDetailPage({ params }: PageProps) {
                   />
                 </div>
                 <div className="min-w-0">
-                  <p className="font-semibold text-foreground leading-tight">{agent.name}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{agent.agency}</p>
-                  <p className="text-xs text-muted-foreground">
-                    CEA: {agent.license_no}
-                  </p>
-                  <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
-                    {agent.strata_agent_id && (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
-                        <Zap className="h-2.5 w-2.5" />
-                        AI-powered
-                      </span>
-                    )}
-                    <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
-                      {agent.listings_count} listings
-                    </span>
-                  </div>
+                  <p className="font-semibold text-slate-900 leading-tight">{agent.name}</p>
+                  <p className="text-xs text-slate-500 mt-0.5">{agent.agency}</p>
+                  <p className="text-xs text-slate-500">CEA: {agent.license_no}</p>
+                  <span className="inline-flex items-center rounded-full bg-slate-100 mt-1.5 px-2 py-0.5 text-[10px] font-medium text-slate-500">
+                    {agent.listings_count} listings
+                  </span>
                 </div>
               </div>
 
@@ -363,14 +346,14 @@ export default async function ListingDetailPage({ params }: PageProps) {
               <div className="grid grid-cols-2 gap-2 mb-4">
                 <a
                   href={`tel:${agent.phone}`}
-                  className="flex items-center justify-center gap-2 rounded-lg border border-border py-2 text-sm font-medium text-foreground hover:bg-muted transition-colors"
+                  className="flex items-center justify-center gap-2 rounded-lg border border-slate-200 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
                 >
                   <Phone className="h-4 w-4" />
                   Call
                 </a>
                 <a
                   href={`mailto:${agent.email}`}
-                  className="flex items-center justify-center gap-2 rounded-lg border border-border py-2 text-sm font-medium text-foreground hover:bg-muted transition-colors"
+                  className="flex items-center justify-center gap-2 rounded-lg border border-slate-200 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
                 >
                   <Mail className="h-4 w-4" />
                   Email
@@ -378,7 +361,7 @@ export default async function ListingDetailPage({ params }: PageProps) {
               </div>
 
               {/* Agent bio */}
-              <p className="text-xs text-muted-foreground leading-relaxed mb-5 line-clamp-3">
+              <p className="text-xs text-slate-500 leading-relaxed mb-5 line-clamp-3">
                 {agent.bio}
               </p>
 
@@ -386,14 +369,14 @@ export default async function ListingDetailPage({ params }: PageProps) {
 
               {/* Inquiry form — desktop sidebar */}
               <div className="hidden lg:block" id="inquiry-form">
-                <h3 className="text-sm font-semibold text-foreground mb-4">
+                <h3 className="text-sm font-semibold text-slate-900 mb-4">
                   Send an inquiry
                 </h3>
                 <InquiryForm listingId={id} agentName={agent.name} />
               </div>
 
               {/* View all by agent */}
-              <div className="mt-5 pt-4 border-t border-border hidden lg:block">
+              <div className="mt-5 pt-4 border-t border-slate-100 hidden lg:block">
                 <Link
                   href={`/listings?agent=${agent.id}`}
                   className="text-sm text-primary hover:text-primary/80 font-medium transition-colors"
@@ -403,30 +386,14 @@ export default async function ListingDetailPage({ params }: PageProps) {
               </div>
             </div>
 
-            {/* Strata AI badge — if applicable */}
-            {agent.strata_agent_id && (
-              <div className="rounded-xl bg-gradient-to-br from-primary/10 to-blue-50 p-4 ring-1 ring-primary/15">
-                <div className="flex items-center gap-2 mb-2">
-                  <Zap className="h-4 w-4 text-primary" />
-                  <p className="text-sm font-semibold text-foreground">
-                    AI-Powered Agent
-                  </p>
-                </div>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  This agent uses Strata AI to respond to inquiries in under 5
-                  seconds — any time of day.
-                </p>
-              </div>
-            )}
-
-            {/* Scheduling card */}
-            <div className="rounded-xl border border-border bg-white p-4">
+            {/* Book a viewing card */}
+            <div className="rounded-xl border border-slate-200 bg-white p-4">
               <div className="flex items-center gap-2 mb-2">
-                <Calendar className="h-4 w-4 text-muted-foreground" />
-                <p className="text-sm font-semibold text-foreground">Book a viewing</p>
+                <Calendar className="h-4 w-4 text-slate-400" />
+                <p className="text-sm font-semibold text-slate-900">Book a viewing</p>
               </div>
-              <p className="text-xs text-muted-foreground leading-relaxed mb-3">
-                Send an inquiry below and mention your preferred viewing date and time.
+              <p className="text-xs text-slate-500 leading-relaxed mb-3">
+                Send an inquiry and mention your preferred viewing date and time.
               </p>
               <a
                 href="#inquiry-form"

@@ -5,9 +5,15 @@ const FOOTER_LINKS = {
   Browse: [
     { label: 'Buy', href: '/listings?type=sale' },
     { label: 'Rent', href: '/listings?type=rent' },
+    { label: 'New Launches', href: '/listings?sort=newest' },
     { label: 'HDB', href: '/listings?property_type=hdb' },
     { label: 'Condo', href: '/listings?property_type=condo' },
     { label: 'Landed', href: '/listings?property_type=landed' },
+    { label: 'Commercial', href: '/listings?property_type=commercial' },
+  ],
+  Agents: [
+    { label: 'List Your Property', href: '/for-agents' },
+    { label: 'Agent Login', href: '/dashboard' },
   ],
   Company: [
     { label: 'About', href: '#' },
@@ -28,7 +34,7 @@ export function Footer() {
   return (
     <footer className="border-t border-border/60 bg-white">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-5">
           {/* Brand column */}
           <div className="flex flex-col gap-4">
             <Link href="/" className="flex items-center gap-2">
@@ -40,8 +46,8 @@ export function Footer() {
               </span>
             </Link>
             <p className="max-w-xs text-sm leading-relaxed text-muted-foreground">
-              Find your next home in Singapore. Browse thousands of verified
-              listings with AI-powered agent support.
+              Find your next home in Singapore. Browse thousands of verified HDB,
+              condo, landed, and commercial listings.
             </p>
           </div>
 
@@ -73,8 +79,9 @@ export function Footer() {
             &copy; {currentYear} Strata Listings. All rights reserved.
           </p>
           <p className="text-xs text-muted-foreground">
-            Powered by{' '}
-            <span className="font-medium text-primary">Strata AI</span>
+            <Link href="/for-agents" className="hover:text-foreground transition-colors">
+              Are you an agent?
+            </Link>
           </p>
         </div>
       </div>
