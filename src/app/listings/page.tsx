@@ -1,7 +1,9 @@
 import { Suspense } from 'react'
 import type { Metadata } from 'next'
-import { getListings } from '@/lib/data'
+import { getAllListings } from '@/lib/listings'
 import type { ListingType, PropertyType, SearchFilters } from '@/types/listing'
+
+export const dynamic = 'force-dynamic'
 import { ListingCard } from '@/components/listing-card'
 import { ListingFilters } from '@/components/listing-filters'
 import { SearchBar } from '@/components/search-bar'
@@ -63,7 +65,7 @@ export default async function ListingsPage({ searchParams }: PageProps) {
     filters.sort = params.sort
   }
 
-  const listings = getListings(filters)
+  const listings = await getAllListings(filters)
   const count = listings.length
 
   return (

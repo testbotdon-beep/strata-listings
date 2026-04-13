@@ -1,7 +1,10 @@
 import Link from 'next/link'
 import { Plus, Eye, Edit, Trash2, MoreVertical } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { getAgentListings, formatPrice } from '@/lib/data'
+import { formatPrice } from '@/lib/data'
+import { getAgentListingsAsync } from '@/lib/listings'
+
+export const dynamic = 'force-dynamic'
 import { PROPERTY_TYPE_LABELS, LISTING_TYPE_LABELS } from '@/types/listing'
 
 const STATUS_CONFIG = {
@@ -19,8 +22,8 @@ function formatDate(iso: string): string {
   })
 }
 
-export default function ListingsPage() {
-  const listings = getAgentListings('agent-1')
+export default async function ListingsPage() {
+  const listings = await getAgentListingsAsync('agent-1')
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">

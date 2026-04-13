@@ -130,7 +130,7 @@ test.describe('Listing Detail', () => {
 
   test('inquiry form is present and submits', async ({ page }) => {
     await page.goto(`${BASE}/listing/listing-1`)
-    await page.waitForLoadState('networkidle')
+    await page.waitForLoadState('domcontentloaded')
 
     // Desktop sidebar form has id="inquiry-form" wrapper
     const form = page.locator('#inquiry-form')

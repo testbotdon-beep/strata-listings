@@ -17,7 +17,10 @@ import {
   Clock,
   Star,
 } from 'lucide-react'
-import { getListingById, getListings, formatPriceFull } from '@/lib/data'
+import { formatPriceFull } from '@/lib/data'
+import { getListingByIdAsync, getAllListings } from '@/lib/listings'
+
+export const dynamic = 'force-dynamic'
 import { LISTING_TYPE_LABELS, SG_DISTRICTS, PROPERTY_TYPE_LABELS, FURNISHING_LABELS } from '@/types/listing'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
@@ -32,7 +35,7 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params
-  const listing = getListingById(id)
+  const listing = await getListingByIdAsync(id)
   if (!listing) return { title: 'Listing not found — Strata Listings' }
 
   const price = formatPriceFull(listing.price, listing.type)
@@ -51,7 +54,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function ListingDetailPage({ params }: PageProps) {
   const { id } = await params
-  const listing = getListingById(id)
+  const listing = await getListingByIdAsync(id)
 
   if (!listing) notFound()
 
@@ -114,19 +117,22 @@ export default async function ListingDetailPage({ params }: PageProps) {
   })
 
   // Similar listings: same type + district, excluding current. Pad with same type if needed.
-  const sameDistrictAndType = getListings({
-    property_type: listing.property_type,
-    district: listing.district,
-  }).filter((l) => l.id !== id)
+  const sameDistrictAndType = (
+    await getAllListings({
+      property_type: listing.property_type,
+      district: listing.district,
+    })
+  ).filter((l) => l.id !== id)
 
-  const similarListings = sameDistrictAndType.length >= 3
-    ? sameDistrictAndType.slice(0, 3)
-    : [
-        ...sameDistrictAndType,
-        ...getListings({ property_type: listing.property_type })
-          .filter((l) => l.id !== id && !sameDistrictAndType.some((s) => s.id === l.id))
-          .slice(0, 3 - sameDistrictAndType.length),
-      ]
+  const similarListings =
+    sameDistrictAndType.length >= 3
+      ? sameDistrictAndType.slice(0, 3)
+      : [
+          ...sameDistrictAndType,
+          ...(await getAllListings({ property_type: listing.property_type }))
+            .filter((l) => l.id !== id && !sameDistrictAndType.some((s) => s.id === l.id))
+            .slice(0, 3 - sameDistrictAndType.length),
+        ]
 
   // Mortgage helper — 25yr, 75% LTV, 3.5% p.a.
   function monthlyMortgage(p: number): number {

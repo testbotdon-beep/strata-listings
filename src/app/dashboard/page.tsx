@@ -13,7 +13,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
-import { getAgentById, getAgentListings, getInquiriesByAgent, formatPrice } from '@/lib/data'
+import { getAgentById, formatPrice } from '@/lib/data'
+import { getAgentListingsAsync, getInquiriesForAgent } from '@/lib/listings'
+
+export const dynamic = 'force-dynamic'
 import { PROPERTY_TYPE_LABELS } from '@/types/listing'
 
 function formatRelativeDate(iso: string): string {
@@ -39,10 +42,10 @@ const INQUIRY_STATUS_CONFIG = {
   converted: { label: 'Converted', className: 'bg-emerald-100 text-emerald-700' },
 }
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
   const agent = getAgentById('agent-1')!
-  const listings = getAgentListings('agent-1')
-  const inquiries = getInquiriesByAgent('agent-1')
+  const listings = await getAgentListingsAsync('agent-1')
+  const inquiries = await getInquiriesForAgent('agent-1')
 
   const totalViews = listings.reduce((sum, l) => sum + l.views, 0)
   const newInquiries = inquiries.filter(i => i.status === 'new').length

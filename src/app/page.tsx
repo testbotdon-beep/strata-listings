@@ -11,11 +11,13 @@ import {
   Award,
 } from 'lucide-react'
 import Image from 'next/image'
-import { getFeaturedListings, getListings } from '@/lib/data'
+import { getFeaturedListingsAll, getAllListings } from '@/lib/listings'
 import { getFeaturedArticles } from '@/lib/articles'
 import { getAllGuides } from '@/lib/guides'
 import { ListingCard } from '@/components/listing-card'
 import { SearchBar } from '@/components/search-bar'
+
+export const dynamic = 'force-dynamic'
 
 const PROPERTY_TYPES = [
   {
@@ -135,9 +137,9 @@ const CATEGORY_COLORS: Record<string, string> = {
   'legal-tax': 'bg-rose-50 text-rose-700',
 }
 
-export default function HomePage() {
-  const featured = getFeaturedListings()
-  const all = getListings()
+export default async function HomePage() {
+  const featured = await getFeaturedListingsAll()
+  const all = await getAllListings()
   const featuredArticles = getFeaturedArticles().slice(0, 3)
   const allGuides = getAllGuides()
   // Map district number → guide slug for popular neighbourhoods

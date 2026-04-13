@@ -15,7 +15,10 @@ import {
   MapPin,
   Globe,
 } from 'lucide-react'
-import { getAgentById, getAgentListings } from '@/lib/data'
+import { getAgentById } from '@/lib/data'
+import { getAgentListingsAsync } from '@/lib/listings'
+
+export const dynamic = 'force-dynamic'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { ListingCard } from '@/components/listing-card'
@@ -65,7 +68,7 @@ export default async function AgentProfilePage({ params }: PageProps) {
 
   if (!agent) notFound()
 
-  const listings = getAgentListings(agent.id)
+  const listings = await getAgentListingsAsync(agent.id)
   const meta = AGENT_META[agent.id] ?? {
     specialisations: ['Residential', 'Singapore Properties'],
     languages: ['English'],

@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { saveInquiry, generateId, type StoredInquiry } from '@/lib/storage'
+import { getListingById, getAgentById } from '@/lib/data'
 
 interface LeadPayload {
-  source: 'listing-inquiry' | 'agent-contact' | 'general-contact' | 'newsletter'
+  source: 'listing-inquiry' | 'agent-contact' | 'general-contact' | 'newsletter' | 'new-listing'
   name?: string
   email?: string
   phone?: string
@@ -24,7 +26,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
   }
 
-  // Basic validation
   if (!body.source) {
     return NextResponse.json({ error: 'Missing source' }, { status: 400 })
   }
@@ -42,11 +43,50 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Valid email required' }, { status: 400 })
   }
 
-  // Server-side log (visible in Vercel logs)
-  const timestamp = new Date().toISOString()
-  console.log(`[LEAD] ${timestamp} ${body.source}:`, JSON.stringify(body))
+  // Resolve agent_id from listingId if not provided directly
+  let agentId = body.agentId ?? null
+  if (!agentId && body.listingId) {
+    const listing = getListingById(body.listingId)
+    if (listing) agentId = listing.agent_id
+  }
+  // Default to agent-1 (Sarah Chen) for general contact / newsletter so they
+  // appear in *some* dashboard during demo
+  if (!agentId && body.source !== 'newsletter') {
+    agentId = 'agent-1'
+  }
 
-  // Forward to webhook if configured (Slack/Discord/Zapier/etc.)
+  // Resolve agent name for display
+  let agentName = body.agentName ?? null
+  if (!agentName && agentId) {
+    const agent = getAgentById(agentId)
+    if (agent) agentName = agent.name
+  }
+
+  const inquiry: StoredInquiry = {
+    id: generateId('inq'),
+    listing_id: body.listingId ?? null,
+    agent_id: agentId,
+    agent_name: agentName,
+    source: body.source,
+    name: body.name ?? '(newsletter signup)',
+    email: body.email,
+    phone: body.phone ?? null,
+    message: body.message ?? '(no message)',
+    created_at: new Date().toISOString(),
+  }
+
+  // Server-side log (visible in Vercel logs)
+  console.log(`[LEAD] ${inquiry.created_at} ${body.source}:`, JSON.stringify(inquiry))
+
+  // Persist to Blob storage (so it shows up in agent dashboard)
+  try {
+    await saveInquiry(inquiry)
+  } catch (err) {
+    console.error('[api/lead] saveInquiry failed:', err)
+    // Don't fail the request — still log + webhook
+  }
+
+  // Forward to webhook if configured (Slack/Discord/Zapier)
   const webhookUrl = process.env.LEAD_WEBHOOK_URL
   if (webhookUrl) {
     try {
@@ -54,16 +94,14 @@ export async function POST(request: NextRequest) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          text: `New ${body.source} lead from ${body.name || body.email}`,
-          ...body,
-          timestamp,
+          text: `New ${body.source} from ${inquiry.name}`,
+          ...inquiry,
         }),
       })
     } catch (err) {
-      // Don't fail the request if webhook fails — lead is still logged
       console.error('[LEAD] Webhook failed:', err)
     }
   }
 
-  return NextResponse.json({ success: true, timestamp })
+  return NextResponse.json({ success: true, id: inquiry.id })
 }
