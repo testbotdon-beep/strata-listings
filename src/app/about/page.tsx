@@ -44,25 +44,11 @@ const VALUES = [
 
 const TEAM = [
   {
-    name: 'Don Tan',
-    role: 'Founder & CEO',
-    bio: 'Former property consultant with 10+ years covering Districts 9-11. Built Strata to fix what was broken in online property search.',
-    initials: 'DT',
+    name: 'Gavin Tan',
+    role: 'Founder',
+    bio: 'Builder at Uniq Labs. Building Strata Listings to give Singapore property agents a faster, fairer alternative to the incumbents.',
+    initials: 'GT',
     color: 'bg-blue-100 text-blue-700',
-  },
-  {
-    name: 'Wei Ling Koh',
-    role: 'Head of Partnerships',
-    bio: 'Ex-PropNex top producer. Leads agent onboarding and ensures every agent on our platform meets our service standards.',
-    initials: 'WK',
-    color: 'bg-violet-100 text-violet-700',
-  },
-  {
-    name: 'James Loh',
-    role: 'Head of Product',
-    bio: 'Built marketplace products at Carousell and Grab. Obsessed with making property search as easy as buying groceries online.',
-    initials: 'JL',
-    color: 'bg-emerald-100 text-emerald-700',
   },
 ]
 
@@ -156,12 +142,12 @@ export default function AboutPage() {
       <section className="bg-slate-50/70 py-16 sm:py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10">
-            <h2 className="text-2xl font-bold text-slate-900 sm:text-3xl">The team</h2>
+            <h2 className="text-2xl font-bold text-slate-900 sm:text-3xl">Who&apos;s building this</h2>
             <p className="mt-3 text-slate-500 max-w-xl mx-auto">
-              Led by a team with deep Singapore property experience.
+              A small Singapore team at Uniq Labs. More joining soon.
             </p>
           </div>
-          <div className="grid gap-6 sm:grid-cols-3">
+          <div className="grid gap-6 sm:grid-cols-1 max-w-md mx-auto">
             {TEAM.map(({ name, role, bio, initials, color }) => (
               <div
                 key={name}

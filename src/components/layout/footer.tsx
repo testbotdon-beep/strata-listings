@@ -1,11 +1,10 @@
 import Link from 'next/link'
-import { Building2, Share2, Globe, MessageSquare } from 'lucide-react'
+import { Building2 } from 'lucide-react'
 import { FooterNewsletter } from '@/components/layout/footer-newsletter'
 
 const BROWSE_LINKS = [
   { label: 'Buy', href: '/listings?type=sale' },
   { label: 'Rent', href: '/listings?type=rent' },
-  { label: 'New Launches', href: '/listings?sort=newest' },
   { label: 'HDB', href: '/listings?property_type=hdb' },
   { label: 'Condos', href: '/listings?property_type=condo' },
   { label: 'Landed', href: '/listings?property_type=landed' },
@@ -13,30 +12,20 @@ const BROWSE_LINKS = [
 ]
 
 const DISCOVER_LINKS = [
-  { label: 'Neighbourhoods', href: '/listings' },
   { label: 'Insights', href: '/insights' },
+  { label: 'Area Guides', href: '/guides' },
   { label: 'Calculators', href: '/calculators' },
   { label: 'For Agents', href: '/for-agents' },
 ]
 
 const COMPANY_LINKS = [
   { label: 'About', href: '/about' },
-  { label: 'Careers', href: '#' },
-  { label: 'Press', href: '#' },
   { label: 'Contact', href: '/contact' },
 ]
 
 const LEGAL_LINKS = [
   { label: 'Terms', href: '/terms' },
   { label: 'Privacy', href: '/privacy' },
-  { label: 'Cookie Policy', href: '#' },
-  { label: 'Disclaimer', href: '#' },
-]
-
-const SOCIAL_LINKS = [
-  { icon: Share2, label: 'LinkedIn', href: '#' },
-  { icon: Globe, label: 'Instagram', href: '#' },
-  { icon: MessageSquare, label: 'Facebook', href: '#' },
 ]
 
 function FooterLinkColumn({
@@ -90,20 +79,6 @@ export function Footer() {
 
             {/* Newsletter signup */}
             <FooterNewsletter />
-
-            {/* Socials */}
-            <div className="flex items-center gap-3">
-              {SOCIAL_LINKS.map(({ icon: Icon, label, href }) => (
-                <Link
-                  key={label}
-                  href={href}
-                  aria-label={label}
-                  className="flex size-9 items-center justify-center rounded-lg border border-slate-700 text-slate-400 transition-colors hover:border-slate-500 hover:text-white"
-                >
-                  <Icon className="size-4" />
-                </Link>
-              ))}
-            </div>
           </div>
 
           {/* Link columns */}
@@ -117,14 +92,14 @@ export function Footer() {
         <div className="mt-12 flex flex-col gap-3 border-t border-slate-800 pt-8 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex flex-col gap-1.5">
             <p className="text-xs text-slate-500">
-              &copy; 2026 Strata Listings Pte Ltd. All rights reserved.
+              &copy; 2026 Uniq Labs Pte Ltd. All rights reserved.
             </p>
             <p className="text-xs text-slate-600">
-              CEA Estate Agent Licence: L3010858B
+              Strata Listings is a product of Uniq Labs, Singapore.
             </p>
           </div>
           <p className="max-w-md text-right text-xs leading-relaxed text-slate-600">
-            Strata Listings is a registered marketplace. All listings are posted by CEA-licensed estate agents.
+            Strata Listings is a marketplace. All listings are posted by CEA-licensed estate agents.
           </p>
         </div>
       </div>

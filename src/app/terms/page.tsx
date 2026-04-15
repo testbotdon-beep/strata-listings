@@ -11,7 +11,7 @@ const SECTIONS = [
     id: 'acceptance',
     heading: '1. Acceptance of Terms',
     content: [
-      'By accessing or using the Strata Listings website, mobile applications, or any related services (collectively, the "Service"), you agree to be bound by these Terms of Service ("Terms"). If you do not agree to these Terms, you must not use the Service. These Terms constitute a legally binding agreement between you and Strata Listings Pte Ltd, a company incorporated in Singapore.',
+      'By accessing or using the Strata Listings website, mobile applications, or any related services (collectively, the "Service"), you agree to be bound by these Terms of Service ("Terms"). If you do not agree to these Terms, you must not use the Service. These Terms constitute a legally binding agreement between you and Uniq Labs Pte Ltd, a company incorporated in Singapore.',
       'We may update these Terms from time to time. Continued use of the Service after changes are posted constitutes your acceptance of the revised Terms. We will make reasonable efforts to notify you of material changes by email or by a prominent notice on the Service.',
     ],
   },
@@ -51,7 +51,7 @@ const SECTIONS = [
     id: 'ip',
     heading: '6. Intellectual Property',
     content: [
-      'The Service and its original content, features, and functionality are owned by Strata Listings Pte Ltd and are protected by Singapore and international copyright, trademark, and other intellectual property laws. You may not reproduce, distribute, modify, or create derivative works from any part of the Service without our prior written consent.',
+      'The Service and its original content, features, and functionality are owned by Uniq Labs Pte Ltd and are protected by Singapore and international copyright, trademark, and other intellectual property laws. You may not reproduce, distribute, modify, or create derivative works from any part of the Service without our prior written consent.',
       'Any feedback, suggestions, or ideas you provide to us regarding the Service may be used by Strata Listings without obligation to you. You waive any claim that such use requires compensation or attribution.',
     ],
   },
@@ -67,7 +67,7 @@ const SECTIONS = [
     id: 'liability',
     heading: '8. Limitation of Liability',
     content: [
-      'To the fullest extent permitted by Singapore law, Strata Listings Pte Ltd, its directors, employees, agents, and licensors shall not be liable for any indirect, incidental, special, consequential, or punitive damages, including but not limited to loss of profits, data, goodwill, or other intangible losses, arising out of or relating to your use of or inability to use the Service.',
+      'To the fullest extent permitted by Singapore law, Uniq Labs Pte Ltd, its directors, employees, agents, and licensors shall not be liable for any indirect, incidental, special, consequential, or punitive damages, including but not limited to loss of profits, data, goodwill, or other intangible losses, arising out of or relating to your use of or inability to use the Service.',
       'In no event shall our total aggregate liability to you for all claims arising out of or relating to the Service exceed the greater of (a) the amount you paid to us in the twelve months preceding the claim, or (b) SGD 100.',
     ],
   },
@@ -130,7 +130,7 @@ export default function TermsPage() {
               <a href="mailto:legal@strata-listings.sg" className="text-primary hover:underline">
                 legal@strata-listings.sg
               </a>{' '}
-              or write to Strata Listings Pte Ltd, 1 Raffles Place #40-01, Singapore 048616.
+              . Strata Listings is operated by Uniq Labs Pte Ltd, Singapore.
             </p>
           </div>
         </div>

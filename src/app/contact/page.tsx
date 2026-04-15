@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Mail, Phone, MapPin, Clock } from 'lucide-react'
+import { Mail, Clock } from 'lucide-react'
 import { ContactForm } from '@/components/contact-form'
 
 export const metadata: Metadata = {
@@ -17,23 +17,9 @@ const CONTACT_INFO = [
     color: 'bg-blue-50 text-blue-600',
   },
   {
-    icon: Phone,
-    label: 'Phone',
-    value: '+65 6123 4567',
-    href: 'tel:+6561234567',
-    color: 'bg-violet-50 text-violet-600',
-  },
-  {
-    icon: MapPin,
-    label: 'Office',
-    value: '1 Raffles Place #40-01, Singapore 048616',
-    href: 'https://maps.google.com/?q=1+Raffles+Place+Singapore',
-    color: 'bg-emerald-50 text-emerald-600',
-  },
-  {
     icon: Clock,
-    label: 'Office hours',
-    value: 'Mon–Fri, 9:00–18:00 SGT',
+    label: 'Response time',
+    value: 'Mon–Fri, within 1 business day',
     href: null,
     color: 'bg-amber-50 text-amber-600',
   },

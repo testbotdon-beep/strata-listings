@@ -67,7 +67,7 @@ const SECTIONS = [
     id: 'contact',
     heading: '8. Contact Us',
     content: [
-      'If you have questions or concerns about this Privacy Policy, or if you wish to exercise your rights under the PDPA, please contact our Data Protection Officer at privacy@strata-listings.sg. You may also write to us at Strata Listings Pte Ltd, 1 Raffles Place #40-01, Singapore 048616.',
+      'If you have questions or concerns about this Privacy Policy, or if you wish to exercise your rights under the PDPA, please contact our Data Protection Officer at privacy@strata-listings.sg. Strata Listings is operated by Uniq Labs Pte Ltd, Singapore.',
       'We take privacy seriously and commit to responding to all data-related requests within the timeframes required by applicable Singapore law. Updates to this Privacy Policy will be posted to this page with a revised "last updated" date.',
     ],
   },
@@ -84,7 +84,7 @@ export default function PrivacyPage() {
           </h1>
           <p className="mt-3 text-sm text-slate-500">Last updated: 1 April 2026</p>
           <p className="mt-4 text-slate-600 leading-relaxed">
-            Strata Listings Pte Ltd is committed to protecting your personal data in accordance with the Singapore Personal Data Protection Act 2012 (PDPA). This policy explains how we collect, use, and safeguard your information.
+            Uniq Labs Pte Ltd is committed to protecting your personal data in accordance with the Singapore Personal Data Protection Act 2012 (PDPA). This policy explains how we collect, use, and safeguard your information.
           </p>
         </div>
       </section>
