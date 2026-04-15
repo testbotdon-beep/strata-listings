@@ -57,15 +57,16 @@ export async function saveUser(user: StoredUser): Promise<void> {
 }
 
 export async function getUserByEmail(email: string): Promise<StoredUser | null> {
-  // Vercel Blob `list()` is eventually consistent — a just-written blob may
-  // not appear for ~1 second. This is critical for register → auto-sign-in
-  // flows. Retry twice with short backoff.
+  // Vercel Blob has two layers of eventual consistency:
+  //   1. `list()` may not return just-written blobs for ~1s
+  //   2. The blob CDN may serve stale content for a short window after overwrite
+  // We handle both: retry `list()` with backoff, and cache-bust the fetch URL.
   const prefix = `${USERS_BY_EMAIL_PREFIX}${encodeURIComponent(email.toLowerCase())}`
   for (let attempt = 0; attempt < 3; attempt++) {
     try {
       const { blobs } = await list({ prefix })
       if (blobs.length > 0) {
-        const res = await fetch(blobs[0].url, { cache: 'no-store' })
+        const res = await fetch(`${blobs[0].url}?_=${Date.now()}`, { cache: 'no-store' })
         if (res.ok) return (await res.json()) as StoredUser
       }
     } catch (err) {
@@ -77,16 +78,20 @@ export async function getUserByEmail(email: string): Promise<StoredUser | null> 
 }
 
 export async function getUserById(id: string): Promise<StoredUser | null> {
-  try {
-    const { blobs } = await list({ prefix: `${USERS_PREFIX}${id}` })
-    if (blobs.length === 0) return null
-    const res = await fetch(blobs[0].url, { cache: 'no-store' })
-    if (!res.ok) return null
-    return (await res.json()) as StoredUser
-  } catch (err) {
-    console.error('[storage] getUserById failed:', err)
-    return null
+  // Same eventual-consistency workaround as getUserByEmail
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      const { blobs } = await list({ prefix: `${USERS_PREFIX}${id}` })
+      if (blobs.length > 0) {
+        const res = await fetch(`${blobs[0].url}?_=${Date.now()}`, { cache: 'no-store' })
+        if (res.ok) return (await res.json()) as StoredUser
+      }
+    } catch (err) {
+      console.error('[storage] getUserById attempt', attempt, 'failed:', err)
+    }
+    if (attempt < 2) await new Promise((r) => setTimeout(r, 400 * (attempt + 1)))
   }
+  return null
 }
 
 export async function getAllUsers(): Promise<StoredUser[]> {
