@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
   try {
     const resend = new Resend(apiKey)
     const { error } = await resend.emails.send({
-      from: 'Strata Listings <noreply@uqlabs.co>',
+      from: 'Strata Listings <onboarding@resend.dev>',
       to: ['kevan@uqlabs.co'],
       replyTo: email,
       subject: `New contact form — ${name}`,
