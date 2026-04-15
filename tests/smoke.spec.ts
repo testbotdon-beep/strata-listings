@@ -165,11 +165,38 @@ test.describe('Listing Detail', () => {
 })
 
 // ─── DASHBOARD ──────────────────────────────────────────────
-// Dashboard is now auth-protected. Each test signs in the demo agent first.
+// Dashboard is auth-protected. Each test file registers a fresh test agent
+// via the API, then signs in. This avoids leaving a persistent demo account
+// in the production Blob store.
+
+const TEST_AGENT = {
+  email: `playwright-${Date.now()}@test.strata-listings.sg`,
+  password: 'playwright-test-password-long',
+  name: 'Playwright Agent',
+  agency: 'Test Realty',
+  phone: '+65 9000 0000',
+}
+
+let testAgentCreated = false
+
+async function ensureTestAgent(page: import('@playwright/test').Page) {
+  if (testAgentCreated) return
+  // Register via API (idempotent — if already exists, 409 is fine)
+  const res = await page.request.post(`${BASE}/api/register`, {
+    data: TEST_AGENT,
+  })
+  if (res.ok() || res.status() === 409) {
+    testAgentCreated = true
+  } else {
+    throw new Error(`Failed to create test agent: ${res.status()}`)
+  }
+}
+
 async function signInDemoAgent(page: import('@playwright/test').Page) {
+  await ensureTestAgent(page)
   await page.goto(`${BASE}/sign-in`)
-  await page.locator('#email').fill('demo@agent.com')
-  await page.locator('#password').fill('password123')
+  await page.locator('#email').fill(TEST_AGENT.email)
+  await page.locator('#password').fill(TEST_AGENT.password)
   await page.locator('main button:has-text("Sign in")').click()
   await page.waitForURL(/dashboard/, { timeout: 15000 })
 }
@@ -177,7 +204,7 @@ async function signInDemoAgent(page: import('@playwright/test').Page) {
 test.describe('Dashboard', () => {
   test('overview page shows stats and content', async ({ page }) => {
     await signInDemoAgent(page)
-    await expect(page.locator('text=Demo Agent').first()).toBeVisible()
+    await expect(page.locator('text=Playwright Agent').first()).toBeVisible()
     await expect(page.locator('text=/Total Listings/i').first()).toBeVisible()
     await expect(page.locator('text=/Active Inquiries/i').first()).toBeVisible()
     await expect(page.locator('text=/Total Views/i').first()).toBeVisible()
@@ -290,7 +317,7 @@ test.describe('Cross-page navigation', () => {
 
   test('full agent journey: sign in → dashboard → listings → new listing', async ({ page }) => {
     await signInDemoAgent(page)
-    await expect(page.locator('text=Demo Agent').first()).toBeVisible()
+    await expect(page.locator('text=Playwright Agent').first()).toBeVisible()
     await page.locator('a[href="/dashboard/listings"]').first().click()
     await expect(page).toHaveURL(/dashboard\/listings/)
     const addBtn = page.locator('a:has-text("Add New Listing"), a:has-text("New Listing")').first()
