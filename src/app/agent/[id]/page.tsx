@@ -17,6 +17,7 @@ import {
 } from 'lucide-react'
 import { getAgentById } from '@/lib/data'
 import { getAgentListingsAsync, resolveAgent } from '@/lib/listings'
+import { whatsappUrl } from '@/lib/whatsapp'
 
 export const dynamic = 'force-dynamic'
 import { Badge } from '@/components/ui/badge'
@@ -164,7 +165,7 @@ export default async function AgentProfilePage({ params }: PageProps) {
                   Call
                 </a>
                 <a
-                  href={`https://wa.me/${agent.phone.replace(/\D/g, '')}`}
+                  href={whatsappUrl(agent.phone, `Hi ${agent.name}, I found your profile on Strata Listings and would like to chat about property.`)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 rounded-lg bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-600 transition-colors"

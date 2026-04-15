@@ -57,17 +57,23 @@ export async function saveUser(user: StoredUser): Promise<void> {
 }
 
 export async function getUserByEmail(email: string): Promise<StoredUser | null> {
-  try {
-    const prefix = `${USERS_BY_EMAIL_PREFIX}${encodeURIComponent(email.toLowerCase())}`
-    const { blobs } = await list({ prefix })
-    if (blobs.length === 0) return null
-    const res = await fetch(blobs[0].url, { cache: 'no-store' })
-    if (!res.ok) return null
-    return (await res.json()) as StoredUser
-  } catch (err) {
-    console.error('[storage] getUserByEmail failed:', err)
-    return null
+  // Vercel Blob `list()` is eventually consistent — a just-written blob may
+  // not appear for ~1 second. This is critical for register → auto-sign-in
+  // flows. Retry twice with short backoff.
+  const prefix = `${USERS_BY_EMAIL_PREFIX}${encodeURIComponent(email.toLowerCase())}`
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      const { blobs } = await list({ prefix })
+      if (blobs.length > 0) {
+        const res = await fetch(blobs[0].url, { cache: 'no-store' })
+        if (res.ok) return (await res.json()) as StoredUser
+      }
+    } catch (err) {
+      console.error('[storage] getUserByEmail attempt', attempt, 'failed:', err)
+    }
+    if (attempt < 2) await new Promise((r) => setTimeout(r, 400 * (attempt + 1)))
   }
+  return null
 }
 
 export async function getUserById(id: string): Promise<StoredUser | null> {
@@ -207,6 +213,18 @@ export async function getStoredInquiries(filter?: { agentId?: string }): Promise
     console.error('[storage] getStoredInquiries failed:', err)
     return []
   }
+}
+
+export async function updateUser(
+  id: string,
+  patch: Partial<Omit<StoredUser, 'id' | 'email' | 'password_hash' | 'created_at'>>
+): Promise<StoredUser | null> {
+  const current = await getUserById(id)
+  if (!current) return null
+  const updated: StoredUser = { ...current, ...patch }
+  // Write to both by-id and by-email paths (email key is stable since we don't let it change)
+  await saveUser(updated)
+  return updated
 }
 
 // ─── ID GENERATION ─────────────────────────────────────────

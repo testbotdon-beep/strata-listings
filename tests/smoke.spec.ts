@@ -198,7 +198,7 @@ async function signInDemoAgent(page: import('@playwright/test').Page) {
   await page.locator('#email').fill(TEST_AGENT.email)
   await page.locator('#password').fill(TEST_AGENT.password)
   await page.locator('main button:has-text("Sign in")').click()
-  await page.waitForURL(/dashboard/, { timeout: 15000 })
+  await page.waitForURL(/dashboard/, { timeout: 30000, waitUntil: 'domcontentloaded' })
 }
 
 test.describe('Dashboard', () => {

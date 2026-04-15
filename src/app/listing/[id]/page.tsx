@@ -9,6 +9,7 @@ import {
   MapPin,
   Phone,
   Mail,
+  MessageCircle,
   Calendar,
   Shield,
   Building2,
@@ -19,6 +20,7 @@ import {
 } from 'lucide-react'
 import { formatPriceFull } from '@/lib/data'
 import { getListingByIdAsync, getAllListings } from '@/lib/listings'
+import { whatsappUrl } from '@/lib/whatsapp'
 
 export const dynamic = 'force-dynamic'
 import { LISTING_TYPE_LABELS, SG_DISTRICTS, PROPERTY_TYPE_LABELS, FURNISHING_LABELS } from '@/types/listing'
@@ -426,13 +428,22 @@ export default async function ListingDetailPage({ params }: PageProps) {
               </div>
 
               {/* Quick contact buttons */}
-              <div className="grid grid-cols-2 gap-2 mb-4">
+              <div className="grid grid-cols-3 gap-2 mb-4">
                 <a
                   href={`tel:${agent.phone}`}
                   className="flex items-center justify-center gap-2 rounded-lg border border-slate-200 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
                 >
                   <Phone className="h-4 w-4" />
                   Call
+                </a>
+                <a
+                  href={whatsappUrl(agent.phone, `Hi ${agent.name}, I'm interested in "${title}" at ${address}. Is it still available?`)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 py-2 text-sm font-medium text-emerald-700 hover:bg-emerald-100 transition-colors"
+                >
+                  <MessageCircle className="h-4 w-4" />
+                  WhatsApp
                 </a>
                 <a
                   href={`mailto:${agent.email}`}
