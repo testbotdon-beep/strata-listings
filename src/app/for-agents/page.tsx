@@ -12,33 +12,33 @@ import {
 export const metadata: Metadata = {
   title: 'For Agents — Strata Listings',
   description:
-    'List your properties for free on Strata Listings. Get AI-powered buyer responses within 5 seconds, 24/7. Built for Singapore property agents.',
+    'List your properties free on Strata Listings. Save $500-1000/mo vs PropertyGuru. Buyers reach you directly on WhatsApp with full listing context.',
 }
 
 const FEATURES = [
   {
     icon: ListChecks,
-    title: 'List for free',
+    title: 'Free listings, forever',
     description:
-      'No listing fees. No featured upgrades. List your properties and reach motivated Singapore buyers and renters.',
-  },
-  {
-    icon: Zap,
-    title: 'AI-powered responses',
-    description:
-      'Strata AI replies to buyer inquiries in under 5 seconds, 24/7. Never miss a lead — even at midnight or on weekends.',
+      'No listing fees. No featured upgrades. Save $500-1000/mo compared to PropertyGuru. Your listings reach buyers through organic SEO and direct traffic.',
   },
   {
     icon: MessageCircle,
-    title: 'Smart lead routing',
+    title: 'WhatsApp-first contact',
     description:
-      'Every buyer inquiry flows directly into your Strata WhatsApp pipeline, pre-qualified and ready for you to close.',
+      'Buyers tap one button and message you directly on WhatsApp — with the listing title and URL pre-filled so you know exactly what they are interested in.',
+  },
+  {
+    icon: Zap,
+    title: 'Pre-qualified lead context',
+    description:
+      'Every WhatsApp inquiry arrives with the listing context baked in. If you already use Strata AI, your assistant picks up the conversation instantly with full listing data.',
   },
   {
     icon: MapPin,
     title: 'Built for Singapore',
     description:
-      'HDB, condo, landed, commercial. Full district search, PSF insights, and CPF/ABSD rules built in.',
+      'HDB, condo, landed, commercial. Full district search, PSF insights, and CPF / ABSD calculators built in for every listing detail page.',
   },
 ]
 
@@ -57,14 +57,15 @@ export default function ForAgentsPage() {
 
             {/* Headline */}
             <h1 className="text-balance text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
-              List free. Respond instantly. Close more deals.
+              List free. Reach buyers on WhatsApp.
             </h1>
 
             {/* Subtitle */}
             <p className="text-base text-slate-300 sm:text-lg leading-relaxed">
-              Strata Listings is Singapore&apos;s only property marketplace built
-              for agents powered by AI. List your properties for free and get
-              Strata AI to qualify every buyer within 5 seconds.
+              Singapore&apos;s property marketplace built around how agents
+              actually work. List properties for free, save $500-1000/mo vs
+              PropertyGuru, and get buyers messaging you directly on WhatsApp
+              with the listing context pre-loaded.
             </p>
 
             {/* CTA */}
@@ -133,27 +134,27 @@ export default function ForAgentsPage() {
             {[
               {
                 step: '01',
-                title: 'Sign up for Strata',
+                title: 'Create your free account',
                 description:
-                  'Create your agent profile and connect your WhatsApp in one click.',
+                  'Sign up in 30 seconds. Add your CEA licence, agency, and contact details.',
               },
               {
                 step: '02',
                 title: 'List your properties',
                 description:
-                  'Add your listings — photos, price, details. Goes live immediately on Strata Listings.',
+                  'Upload photos, set the price, add details. Your listings go live on the marketplace immediately.',
               },
               {
                 step: '03',
-                title: 'AI handles the inquiries',
+                title: 'Buyers WhatsApp you',
                 description:
-                  'Strata AI responds to every buyer within 5 seconds, qualifies them, and books viewings.',
+                  'Every inquiry comes straight to your WhatsApp with the listing title and URL pre-filled.',
               },
               {
                 step: '04',
-                title: 'Show up and close',
+                title: 'Close the deal',
                 description:
-                  'You get pre-qualified leads with scheduled viewings. Just show up and close.',
+                  'Reply in your usual way, or pair with Strata AI for 24/7 automatic qualification and viewing bookings.',
               },
             ].map(({ step, title, description }) => (
               <div key={step} className="flex-1 flex flex-col gap-3">
@@ -173,22 +174,22 @@ export default function ForAgentsPage() {
             Simple, transparent pricing
           </h2>
           <p className="text-slate-500 mb-10">
-            Strata Listings is free forever for agents. Listing on the marketplace
-            is included with your Strata subscription.
+            Strata Listings is free forever for agents. No hidden fees,
+            no featured upgrades, no commission on closed deals.
           </p>
 
           <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm text-left">
             <div className="flex items-start justify-between gap-6 flex-wrap">
               <div>
-                <p className="text-sm font-semibold text-primary uppercase tracking-wide mb-1">
-                  Strata Agent Plan
+                <p className="text-sm font-semibold text-emerald-600 uppercase tracking-wide mb-1">
+                  Free Forever
                 </p>
                 <p className="text-4xl font-bold text-slate-900">
-                  $249
-                  <span className="text-base font-normal text-slate-500">/mo</span>
+                  $0
+                  <span className="text-base font-normal text-slate-500">/month</span>
                 </p>
                 <p className="mt-1 text-sm text-slate-500">
-                  Listings included — no extra charge
+                  Unlimited listings. No credit card required.
                 </p>
               </div>
               <Link
@@ -202,17 +203,17 @@ export default function ForAgentsPage() {
 
             <div className="mt-6 border-t border-slate-100 pt-6 grid sm:grid-cols-2 gap-3">
               {[
-                'Unlimited listings on Strata Listings',
-                'AI-powered buyer qualification',
-                'WhatsApp pipeline integration',
-                'Smart viewing scheduler',
-                'Lead scoring and tracking',
-                'District and PSF analytics',
-                '300 leads per month',
-                '24/7 AI availability',
+                'Unlimited listings',
+                'Unlimited photos per listing',
+                'Agent profile page with all your listings',
+                'WhatsApp click-to-chat on every listing',
+                'District, MRT, and PSF search',
+                'SEO-optimised listing pages',
+                'Full dashboard with view analytics',
+                'No commission on closed deals',
               ].map((feature) => (
                 <div key={feature} className="flex items-center gap-2 text-sm text-slate-600">
-                  <div className="h-1.5 w-1.5 rounded-full bg-primary shrink-0" />
+                  <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 shrink-0" />
                   {feature}
                 </div>
               ))}
@@ -220,7 +221,7 @@ export default function ForAgentsPage() {
           </div>
 
           <p className="mt-4 text-xs text-slate-400">
-            Use promo code <span className="font-semibold text-slate-600">WELCOME</span> for $69 your first month.
+            Already use Strata AI for WhatsApp? Your Strata Listings account links automatically — buyer inquiries flow into your existing pipeline.
           </p>
         </div>
       </section>
@@ -234,9 +235,10 @@ export default function ForAgentsPage() {
             ))}
           </div>
           <blockquote className="text-lg font-medium text-slate-800 leading-relaxed mb-6">
-            &ldquo;Strata Listings has transformed how I handle buyer inquiries. I&apos;m
-            closing 2x more deals with half the effort — the AI literally never
-            sleeps.&rdquo;
+            &ldquo;I was paying PropertyGuru $800 a month for listings. Switched to
+            Strata Listings and now buyers message me directly on WhatsApp with
+            the listing title already in their first message. Zero downside,
+            massive savings.&rdquo;
           </blockquote>
           <div className="flex items-center justify-center gap-3">
             <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-sm font-bold text-primary">

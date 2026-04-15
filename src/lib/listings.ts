@@ -5,7 +5,12 @@ import {
   getAgentById,
   getAgents,
 } from '@/lib/data'
-import { getStoredListings, getStoredInquiries, getUserById } from '@/lib/storage'
+import {
+  getStoredListings,
+  getStoredInquiries,
+  getUserById,
+  getListingsByAgent,
+} from '@/lib/storage'
 import type { Listing, SearchFilters, Agent, Inquiry } from '@/types/listing'
 
 // Build an Agent object from a stored real user (from signup via /api/register)
@@ -75,8 +80,17 @@ export async function getListingByIdAsync(id: string): Promise<Listing | undefin
 }
 
 export async function getAgentListingsAsync(agentId: string): Promise<Listing[]> {
-  const all = await getAllListings()
-  return all.filter((l) => l.agent_id === agentId)
+  // Fast path: agent's listings are indexed by agent_id in Redis (Set membership)
+  const stored = await getListingsByAgent(agentId)
+  const storedHydrated: Listing[] = await Promise.all(
+    stored.map(async (l) => {
+      const agent = (await resolveAgent(l.agent_id)) ?? getAgents()[0]
+      return { ...l, agent }
+    })
+  )
+  // Also include any mock-seeded listings for this agent (seed agents like agent-1)
+  const mockForAgent = getMockListings().filter((l) => l.agent_id === agentId)
+  return [...storedHydrated, ...mockForAgent]
 }
 
 // ─── INQUIRIES ─────────────────────────────────────────────

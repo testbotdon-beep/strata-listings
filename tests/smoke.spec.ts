@@ -127,19 +127,23 @@ test.describe('Listing Detail', () => {
     await expect(page.locator('text=Keppel Bay').first()).toBeVisible()
   })
 
-  test('inquiry form is present and submits', async ({ page }) => {
+  test('WhatsApp contact button is present and links correctly', async ({ page }) => {
     await page.goto(`${BASE}/listing/listing-1`)
     await page.waitForLoadState('domcontentloaded')
 
-    // Desktop sidebar form has id="inquiry-form" wrapper
-    const form = page.locator('#inquiry-form')
-    await form.locator('#inquiry-name').fill('Test User')
-    await form.locator('#inquiry-email').fill('test@example.com')
-    await form.locator('#inquiry-phone').fill('+65 9999 9999')
-    await form.locator('button:has-text("Send Inquiry")').click()
+    // WhatsApp is the primary contact CTA — should be on every listing detail page
+    const whatsappLinks = page.locator('a[href*="wa.me/"]')
+    expect(await whatsappLinks.count()).toBeGreaterThan(0)
 
-    // Wait for simulated network delay then success
-    await expect(page.locator('text=/Inquiry sent/').first()).toBeVisible({ timeout: 10000 })
+    // First WhatsApp link should be to a Singapore phone (65 country code)
+    const href = await whatsappLinks.first().getAttribute('href')
+    expect(href).toMatch(/wa\.me\/65\d{8}/)
+    // Should have a prefilled text parameter referencing the listing
+    expect(href).toContain('text=')
+
+    // Call link should also exist
+    const callLinks = page.locator('a[href^="tel:"]')
+    expect(await callLinks.count()).toBeGreaterThan(0)
   })
 
   test('image gallery shows multiple images', async ({ page }) => {
@@ -297,7 +301,7 @@ test.describe('Mobile', () => {
 
 // ─── CROSS-PAGE NAVIGATION ─────────────────────────────────
 test.describe('Cross-page navigation', () => {
-  test('full user journey: home → listing → inquiry', async ({ page }) => {
+  test('full user journey: home → listing → WhatsApp contact', async ({ page }) => {
     await page.goto(BASE)
     await expect(page.locator('text=/Find a home/')).toBeVisible()
 
@@ -306,13 +310,12 @@ test.describe('Cross-page navigation', () => {
     await expect(page).toHaveURL(/\/listing\//)
     await expect(page.locator('text=About this property').first()).toBeVisible()
 
-    // Desktop sidebar form
-    const sidebar = page.locator('.hidden.lg\\:block').filter({ has: page.locator('#inquiry-name') })
-    await sidebar.locator('#inquiry-name').fill('Journey Test')
-    await sidebar.locator('#inquiry-email').fill('journey@test.com')
-    await sidebar.locator('#inquiry-phone').fill('+65 8888 8888')
-    await sidebar.locator('button:has-text("Send Inquiry")').click()
-    await expect(page.locator('text=/Inquiry sent/').first()).toBeVisible({ timeout: 5000 })
+    // WhatsApp is the primary contact — verify links are present and well-formed
+    const whatsappLinks = page.locator('a[href*="wa.me/"]')
+    expect(await whatsappLinks.count()).toBeGreaterThan(0)
+    const href = await whatsappLinks.first().getAttribute('href')
+    expect(href).toMatch(/wa\.me\/65\d{8}/)
+    expect(href).toContain('text=')
   })
 
   test('full agent journey: sign in → dashboard → listings → new listing', async ({ page }) => {

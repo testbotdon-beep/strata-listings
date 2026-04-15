@@ -1,25 +1,35 @@
 import 'server-only'
-import { put, list, del } from '@vercel/blob'
-import type { Listing, Inquiry, ListingType, PropertyType, FurnishingLevel } from '@/types/listing'
+import { Redis } from '@upstash/redis'
+import type {
+  Listing,
+  ListingType,
+  PropertyType,
+  FurnishingLevel,
+} from '@/types/listing'
 
-// Vercel Blob is used as a simple JSON document store.
-// Each entity is stored at a deterministic path:
-//   listings/<id>.json
-//   inquiries/<id>.json
-//
-// Reads list and fetch all blobs (acceptable for low volume — pre-launch
-// inventory will be measured in the dozens). Writes are upsert via `put`.
-//
-// The data here PERSISTS across requests and deployments — unlike the
-// in-memory mock data in lib/data.ts which we still merge with for seed
-// content until real agents fill the catalogue.
+// ─── UPSTASH CLIENT ────────────────────────────────────────
+// Env vars use the `storage_` prefix set during Vercel Marketplace install.
+const redis = new Redis({
+  url: process.env.storage_KV_REST_API_URL!,
+  token: process.env.storage_KV_REST_API_TOKEN!,
+})
 
-const LISTINGS_PREFIX = 'listings/'
-const INQUIRIES_PREFIX = 'inquiries/'
-const USERS_PREFIX = 'users/'
-const USERS_BY_EMAIL_PREFIX = 'users-by-email/'
+// ─── KEY SCHEMA ────────────────────────────────────────────
+const K = {
+  listing: (id: string) => `listing:${id}`,
+  listingIds: 'listings:all',
+  listingsByAgent: (agentId: string) => `listings:agent:${agentId}`,
 
-// ─── USERS (AUTH) ──────────────────────────────────────────
+  user: (id: string) => `user:${id}`,
+  userByEmail: (email: string) => `user:email:${email.toLowerCase()}`,
+  userIds: 'users:all',
+
+  inquiry: (id: string) => `inquiry:${id}`,
+  inquiriesByAgent: (agentId: string) => `inquiries:agent:${agentId}`,
+  inquiryIds: 'inquiries:all',
+}
+
+// ─── TYPES ─────────────────────────────────────────────────
 
 export interface StoredUser {
   id: string
@@ -33,86 +43,6 @@ export interface StoredUser {
   bio: string
   strata_agent_id: string | null
   created_at: string
-}
-
-export async function saveUser(user: StoredUser): Promise<void> {
-  // Write by id and by email (email lowercased) for lookup
-  const byId = `${USERS_PREFIX}${user.id}.json`
-  const byEmail = `${USERS_BY_EMAIL_PREFIX}${encodeURIComponent(user.email.toLowerCase())}.json`
-  const payload = JSON.stringify(user)
-  await Promise.all([
-    put(byId, payload, {
-      access: 'public',
-      contentType: 'application/json',
-      addRandomSuffix: false,
-      allowOverwrite: true,
-    }),
-    put(byEmail, payload, {
-      access: 'public',
-      contentType: 'application/json',
-      addRandomSuffix: false,
-      allowOverwrite: true,
-    }),
-  ])
-}
-
-export async function getUserByEmail(email: string): Promise<StoredUser | null> {
-  // Vercel Blob has two layers of eventual consistency:
-  //   1. `list()` may not return just-written blobs for ~1s
-  //   2. The blob CDN may serve stale content for a short window after overwrite
-  // We handle both: retry `list()` with backoff, and cache-bust the fetch URL.
-  const prefix = `${USERS_BY_EMAIL_PREFIX}${encodeURIComponent(email.toLowerCase())}`
-  for (let attempt = 0; attempt < 3; attempt++) {
-    try {
-      const { blobs } = await list({ prefix })
-      if (blobs.length > 0) {
-        const res = await fetch(`${blobs[0].url}?_=${Date.now()}`, { cache: 'no-store' })
-        if (res.ok) return (await res.json()) as StoredUser
-      }
-    } catch (err) {
-      console.error('[storage] getUserByEmail attempt', attempt, 'failed:', err)
-    }
-    if (attempt < 2) await new Promise((r) => setTimeout(r, 400 * (attempt + 1)))
-  }
-  return null
-}
-
-export async function getUserById(id: string): Promise<StoredUser | null> {
-  // Same eventual-consistency workaround as getUserByEmail
-  for (let attempt = 0; attempt < 3; attempt++) {
-    try {
-      const { blobs } = await list({ prefix: `${USERS_PREFIX}${id}` })
-      if (blobs.length > 0) {
-        const res = await fetch(`${blobs[0].url}?_=${Date.now()}`, { cache: 'no-store' })
-        if (res.ok) return (await res.json()) as StoredUser
-      }
-    } catch (err) {
-      console.error('[storage] getUserById attempt', attempt, 'failed:', err)
-    }
-    if (attempt < 2) await new Promise((r) => setTimeout(r, 400 * (attempt + 1)))
-  }
-  return null
-}
-
-export async function getAllUsers(): Promise<StoredUser[]> {
-  try {
-    const { blobs } = await list({ prefix: USERS_PREFIX })
-    if (blobs.length === 0) return []
-    const results = await Promise.all(
-      blobs.map(async (blob) => {
-        try {
-          const res = await fetch(blob.url, { cache: 'no-store' })
-          if (!res.ok) return null
-          return (await res.json()) as StoredUser
-        } catch {
-          return null
-        }
-      })
-    )
-    return results.filter((u): u is StoredUser => u !== null)
-  } catch {
-    return []
-  }
 }
 
 export interface StoredListing extends Omit<Listing, 'agent'> {
@@ -132,92 +62,32 @@ export interface StoredInquiry {
   created_at: string
 }
 
-// ─── LISTINGS ──────────────────────────────────────────────
+// ─── USERS ──────────────────────────────────────────────────
 
-export async function saveListing(listing: StoredListing): Promise<void> {
-  const path = `${LISTINGS_PREFIX}${listing.id}.json`
-  await put(path, JSON.stringify(listing), {
-    access: 'public',
-    contentType: 'application/json',
-    addRandomSuffix: false,
-    allowOverwrite: true,
-  })
+export async function saveUser(user: StoredUser): Promise<void> {
+  // Pipeline: write the user JSON, the email index, and add to the users set atomically
+  const pipe = redis.pipeline()
+  pipe.set(K.user(user.id), user)
+  pipe.set(K.userByEmail(user.email), user.id)
+  pipe.sadd(K.userIds, user.id)
+  await pipe.exec()
 }
 
-export async function getStoredListings(): Promise<StoredListing[]> {
-  try {
-    const { blobs } = await list({ prefix: LISTINGS_PREFIX })
-    if (blobs.length === 0) return []
-    const results = await Promise.all(
-      blobs.map(async (blob) => {
-        try {
-          const res = await fetch(blob.url, { cache: 'no-store' })
-          if (!res.ok) return null
-          return (await res.json()) as StoredListing
-        } catch {
-          return null
-        }
-      })
-    )
-    return results.filter((l): l is StoredListing => l !== null)
-  } catch (err) {
-    console.error('[storage] getStoredListings failed:', err)
-    return []
-  }
+export async function getUserById(id: string): Promise<StoredUser | null> {
+  return (await redis.get<StoredUser>(K.user(id))) ?? null
 }
 
-export async function getStoredListing(id: string): Promise<StoredListing | null> {
-  const all = await getStoredListings()
-  return all.find((l) => l.id === id) ?? null
+export async function getUserByEmail(email: string): Promise<StoredUser | null> {
+  const id = await redis.get<string>(K.userByEmail(email))
+  if (!id) return null
+  return getUserById(id)
 }
 
-export async function deleteListing(id: string): Promise<void> {
-  const path = `${LISTINGS_PREFIX}${id}.json`
-  try {
-    await del(path)
-  } catch (err) {
-    console.error('[storage] deleteListing failed:', err)
-  }
-}
-
-// ─── INQUIRIES ─────────────────────────────────────────────
-
-export async function saveInquiry(inquiry: StoredInquiry): Promise<void> {
-  const path = `${INQUIRIES_PREFIX}${inquiry.id}.json`
-  await put(path, JSON.stringify(inquiry), {
-    access: 'public',
-    contentType: 'application/json',
-    addRandomSuffix: false,
-    allowOverwrite: true,
-  })
-}
-
-export async function getStoredInquiries(filter?: { agentId?: string }): Promise<StoredInquiry[]> {
-  try {
-    const { blobs } = await list({ prefix: INQUIRIES_PREFIX })
-    if (blobs.length === 0) return []
-    const results = await Promise.all(
-      blobs.map(async (blob) => {
-        try {
-          const res = await fetch(blob.url, { cache: 'no-store' })
-          if (!res.ok) return null
-          return (await res.json()) as StoredInquiry
-        } catch {
-          return null
-        }
-      })
-    )
-    let inquiries = results.filter((i): i is StoredInquiry => i !== null)
-    if (filter?.agentId) {
-      inquiries = inquiries.filter((i) => i.agent_id === filter.agentId)
-    }
-    return inquiries.sort(
-      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-    )
-  } catch (err) {
-    console.error('[storage] getStoredInquiries failed:', err)
-    return []
-  }
+export async function getAllUsers(): Promise<StoredUser[]> {
+  const ids = await redis.smembers(K.userIds)
+  if (ids.length === 0) return []
+  const results = await redis.mget<(StoredUser | null)[]>(...ids.map((i) => K.user(i)))
+  return results.filter((u): u is StoredUser => u !== null)
 }
 
 export async function updateUser(
@@ -227,9 +97,74 @@ export async function updateUser(
   const current = await getUserById(id)
   if (!current) return null
   const updated: StoredUser = { ...current, ...patch }
-  // Write to both by-id and by-email paths (email key is stable since we don't let it change)
   await saveUser(updated)
   return updated
+}
+
+// ─── LISTINGS ───────────────────────────────────────────────
+
+export async function saveListing(listing: StoredListing): Promise<void> {
+  const pipe = redis.pipeline()
+  pipe.set(K.listing(listing.id), listing)
+  pipe.sadd(K.listingIds, listing.id)
+  pipe.sadd(K.listingsByAgent(listing.agent_id), listing.id)
+  await pipe.exec()
+}
+
+export async function getStoredListing(id: string): Promise<StoredListing | null> {
+  return (await redis.get<StoredListing>(K.listing(id))) ?? null
+}
+
+export async function getStoredListings(): Promise<StoredListing[]> {
+  const ids = await redis.smembers(K.listingIds)
+  if (ids.length === 0) return []
+  const results = await redis.mget<(StoredListing | null)[]>(...ids.map((i) => K.listing(i)))
+  return results.filter((l): l is StoredListing => l !== null)
+}
+
+export async function getListingsByAgent(agentId: string): Promise<StoredListing[]> {
+  const ids = await redis.smembers(K.listingsByAgent(agentId))
+  if (ids.length === 0) return []
+  const results = await redis.mget<(StoredListing | null)[]>(...ids.map((i) => K.listing(i)))
+  return results.filter((l): l is StoredListing => l !== null)
+}
+
+export async function deleteListing(id: string): Promise<void> {
+  const listing = await getStoredListing(id)
+  if (!listing) return
+  const pipe = redis.pipeline()
+  pipe.del(K.listing(id))
+  pipe.srem(K.listingIds, id)
+  pipe.srem(K.listingsByAgent(listing.agent_id), id)
+  await pipe.exec()
+}
+
+// ─── INQUIRIES ──────────────────────────────────────────────
+
+export async function saveInquiry(inquiry: StoredInquiry): Promise<void> {
+  const pipe = redis.pipeline()
+  pipe.set(K.inquiry(inquiry.id), inquiry)
+  pipe.sadd(K.inquiryIds, inquiry.id)
+  if (inquiry.agent_id) {
+    pipe.sadd(K.inquiriesByAgent(inquiry.agent_id), inquiry.id)
+  }
+  await pipe.exec()
+}
+
+export async function getStoredInquiries(filter?: {
+  agentId?: string
+}): Promise<StoredInquiry[]> {
+  const key = filter?.agentId
+    ? K.inquiriesByAgent(filter.agentId)
+    : K.inquiryIds
+  const ids = await redis.smembers(key)
+  if (ids.length === 0) return []
+  const results = await redis.mget<(StoredInquiry | null)[]>(...ids.map((i) => K.inquiry(i)))
+  return results
+    .filter((i): i is StoredInquiry => i !== null)
+    .sort(
+      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    )
 }
 
 // ─── ID GENERATION ─────────────────────────────────────────
@@ -288,9 +223,12 @@ export function buildListing(payload: NewListingPayload): StoredListing {
     lat: 0,
     lng: 0,
     amenities: payload.amenities,
-    photos: payload.photos.length > 0
-      ? payload.photos
-      : ['https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&h=600&fit=crop'],
+    photos:
+      payload.photos.length > 0
+        ? payload.photos
+        : [
+            'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&h=600&fit=crop',
+          ],
     floor_plan_url: null,
     furnishing: payload.furnishing,
     floor_level: payload.floor_level ?? null,

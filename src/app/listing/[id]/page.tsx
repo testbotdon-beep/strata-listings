@@ -8,7 +8,6 @@ import {
   Maximize,
   MapPin,
   Phone,
-  Mail,
   MessageCircle,
   Calendar,
   Shield,
@@ -27,7 +26,6 @@ import { LISTING_TYPE_LABELS, SG_DISTRICTS, PROPERTY_TYPE_LABELS, FURNISHING_LAB
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { ImageGallery } from '@/components/image-gallery'
-import { InquiryForm } from '@/components/inquiry-form'
 import { FavoriteButton } from '@/components/favorite-button'
 import { ListingCard } from '@/components/listing-card'
 
@@ -379,12 +377,38 @@ export default async function ListingDetailPage({ params }: PageProps) {
 
             <Separator />
 
-            {/* Inquiry form (mobile) */}
-            <section className="lg:hidden" id="inquiry-form-mobile">
+            {/* Contact agent (mobile) */}
+            <section className="lg:hidden">
               <h2 className="text-lg font-semibold text-slate-900 mb-4">
-                Contact agent
+                Contact {agent.name}
               </h2>
-              <InquiryForm listingId={id} agentName={agent.name} idPrefix="mobile-inquiry" />
+              <div className="flex flex-col gap-2.5">
+                <a
+                  href={whatsappUrl(
+                    agent.phone,
+                    `Hi ${agent.name}, I'm interested in "${title}" at ${address} (${`https://listings.uqlabs.co/listing/${id}`}). Is it still available?`
+                  )}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 rounded-xl bg-emerald-500 py-3 text-sm font-semibold text-white hover:bg-emerald-600 transition-colors shadow-sm"
+                >
+                  <MessageCircle className="h-5 w-5" />
+                  Message on WhatsApp
+                </a>
+                <a
+                  href={`tel:${agent.phone}`}
+                  className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
+                >
+                  <Phone className="h-4 w-4" />
+                  Call {agent.phone}
+                </a>
+                <a
+                  href={`mailto:${agent.email}?subject=${encodeURIComponent(`Inquiry: ${title}`)}`}
+                  className="text-center text-xs text-slate-500 hover:text-slate-700 py-2"
+                >
+                  Prefer email? <span className="underline underline-offset-2">Send a message</span>
+                </a>
+              </div>
             </section>
           </div>
 
@@ -427,30 +451,36 @@ export default async function ListingDetailPage({ params }: PageProps) {
                 </div>
               </div>
 
-              {/* Quick contact buttons */}
-              <div className="grid grid-cols-3 gap-2 mb-4">
+              {/* Primary CTA — WhatsApp */}
+              <a
+                href={whatsappUrl(
+                  agent.phone,
+                  `Hi ${agent.name}, I'm interested in "${title}" at ${address} (${`https://listings.uqlabs.co/listing/${id}`}). Is it still available?`
+                )}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 rounded-xl bg-emerald-500 py-3 text-sm font-semibold text-white hover:bg-emerald-600 transition-colors shadow-sm mb-2.5"
+              >
+                <MessageCircle className="h-5 w-5" />
+                Message on WhatsApp
+              </a>
+
+              {/* Secondary CTA — Call */}
+              <a
+                href={`tel:${agent.phone}`}
+                className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors mb-4"
+              >
+                <Phone className="h-4 w-4" />
+                Call {agent.phone}
+              </a>
+
+              {/* Tertiary — Email as small text link */}
+              <div className="flex items-center justify-center mb-5">
                 <a
-                  href={`tel:${agent.phone}`}
-                  className="flex items-center justify-center gap-2 rounded-lg border border-slate-200 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
+                  href={`mailto:${agent.email}?subject=${encodeURIComponent(`Inquiry: ${title}`)}&body=${encodeURIComponent(`Hi ${agent.name},\n\nI'm interested in "${title}" at ${address}.\n\nListing: https://listings.uqlabs.co/listing/${id}\n\nPlease let me know if it's still available.\n\nThanks`)}`}
+                  className="text-xs text-slate-500 hover:text-slate-700 transition-colors"
                 >
-                  <Phone className="h-4 w-4" />
-                  Call
-                </a>
-                <a
-                  href={whatsappUrl(agent.phone, `Hi ${agent.name}, I'm interested in "${title}" at ${address}. Is it still available?`)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 py-2 text-sm font-medium text-emerald-700 hover:bg-emerald-100 transition-colors"
-                >
-                  <MessageCircle className="h-4 w-4" />
-                  WhatsApp
-                </a>
-                <a
-                  href={`mailto:${agent.email}`}
-                  className="flex items-center justify-center gap-2 rounded-lg border border-slate-200 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
-                >
-                  <Mail className="h-4 w-4" />
-                  Email
+                  Prefer email? <span className="underline underline-offset-2">Send a message</span>
                 </a>
               </div>
 
@@ -458,16 +488,6 @@ export default async function ListingDetailPage({ params }: PageProps) {
               <p className="text-xs text-slate-500 leading-relaxed mb-5 line-clamp-3">
                 {agent.bio}
               </p>
-
-              <Separator className="mb-5" />
-
-              {/* Inquiry form — desktop sidebar */}
-              <div className="hidden lg:block" id="inquiry-form">
-                <h3 className="text-sm font-semibold text-slate-900 mb-4">
-                  Send an inquiry
-                </h3>
-                <InquiryForm listingId={id} agentName={agent.name} />
-              </div>
 
               {/* View all by agent */}
               <div className="mt-5 pt-4 border-t border-slate-100 hidden lg:block">
@@ -511,12 +531,18 @@ export default async function ListingDetailPage({ params }: PageProps) {
                 <p className="text-sm font-semibold text-slate-900">Book a viewing</p>
               </div>
               <p className="text-xs text-slate-500 leading-relaxed mb-3">
-                Send an inquiry and mention your preferred viewing date and time.
+                Message {agent.name.split(' ')[0]} on WhatsApp with your preferred date and time.
               </p>
               <a
-                href="#inquiry-form"
-                className="flex w-full items-center justify-center rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-colors"
+                href={whatsappUrl(
+                  agent.phone,
+                  `Hi ${agent.name}, I'd like to book a viewing for "${title}" at ${address}. When are you available?`
+                )}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-600 transition-colors"
               >
+                <MessageCircle className="h-4 w-4" />
                 Request a viewing
               </a>
             </div>

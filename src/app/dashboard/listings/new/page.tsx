@@ -1,10 +1,8 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
-import { Upload, X, CheckCircle2, ChevronLeft, Loader2 } from 'lucide-react'
-import { upload } from '@vercel/blob/client'
+import { Image as ImageIcon, X, CheckCircle2, ChevronLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -93,14 +91,10 @@ type FormMode = 'draft' | 'published' | null
 export default function NewListingPage() {
   const [form, setForm] = useState<FormState>(INITIAL_FORM)
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([])
-  const [photos, setPhotos] = useState<string[]>([])
-  const [uploadingPhotos, setUploadingPhotos] = useState(false)
-  const [photoError, setPhotoError] = useState<string | null>(null)
   const [submitMode, setSubmitMode] = useState<FormMode>(null)
   const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [createdListing, setCreatedListing] = useState<{ id: string } | null>(null)
-  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const update = <K extends keyof FormState>(key: K, value: FormState[K]) => {
     setForm((prev) => ({ ...prev, [key]: value }))
@@ -111,40 +105,6 @@ export default function NewListingPage() {
     setSelectedAmenities((prev) =>
       prev.includes(amenity) ? prev.filter((a) => a !== amenity) : [...prev, amenity]
     )
-  }
-
-  const handlePhotoFiles = async (files: FileList | null) => {
-    if (!files || files.length === 0) return
-    const remaining = 10 - photos.length
-    if (remaining <= 0) {
-      setPhotoError('Maximum 10 photos allowed.')
-      return
-    }
-    const selected = Array.from(files).slice(0, remaining)
-    setPhotoError(null)
-    setUploadingPhotos(true)
-    try {
-      const urls: string[] = []
-      for (const file of selected) {
-        const blob = await upload(
-          `listing-photos/${Date.now()}-${file.name}`,
-          file,
-          { access: 'public', handleUploadUrl: '/api/upload' }
-        )
-        urls.push(blob.url)
-      }
-      setPhotos((prev) => [...prev, ...urls])
-    } catch (err) {
-      setPhotoError((err as Error).message || 'Failed to upload photos. Please try again.')
-    } finally {
-      setUploadingPhotos(false)
-      // Reset input so the same file can be re-selected after removal
-      if (fileInputRef.current) fileInputRef.current.value = ''
-    }
-  }
-
-  const removePhoto = (url: string) => {
-    setPhotos((prev) => prev.filter((p) => p !== url))
   }
 
   const handleSubmit = async (mode: 'draft' | 'published') => {
@@ -178,7 +138,7 @@ export default function NewListingPage() {
       district: Number(form.district),
       postal_code: form.postal_code.trim(),
       amenities: selectedAmenities,
-      photos,
+      photos: [], // Photo upload temporarily disabled — listings use a default image
       furnishing: form.furnishing,
       floor_level: form.floor_level || undefined,
       tenure: form.tenure || undefined,
@@ -238,7 +198,6 @@ export default function NewListingPage() {
               setSubmitMode(null)
               setForm(INITIAL_FORM)
               setSelectedAmenities([])
-              setPhotos([])
               setCreatedListing(null)
             }}
           >
@@ -518,101 +477,19 @@ export default function NewListingPage() {
           </div>
         </FormSection>
 
-        <FormSection title="Photos" description="Upload photos of your property. First photo will be used as the main listing image.">
-          <div className="col-span-2 space-y-4">
-            {/* Drop zone */}
-            <div
-              className={`rounded-xl border-2 border-dashed p-8 text-center transition-colors ${
-                uploadingPhotos || photos.length >= 10
-                  ? 'border-gray-200 bg-gray-50 cursor-not-allowed opacity-60'
-                  : 'border-gray-300 bg-gray-50 hover:border-blue-400 hover:bg-blue-50 cursor-pointer'
-              }`}
-              onClick={() => {
-                if (!uploadingPhotos && photos.length < 10) fileInputRef.current?.click()
-              }}
-              onDragOver={(e) => e.preventDefault()}
-              onDrop={(e) => {
-                e.preventDefault()
-                if (!uploadingPhotos && photos.length < 10) {
-                  handlePhotoFiles(e.dataTransfer.files)
-                }
-              }}
-            >
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                multiple
-                className="hidden"
-                onChange={(e) => handlePhotoFiles(e.target.files)}
-              />
-              <div className="flex size-12 items-center justify-center rounded-full bg-white shadow-sm mx-auto mb-3">
-                {uploadingPhotos ? (
-                  <Loader2 className="size-5 text-blue-500 animate-spin" />
-                ) : (
-                  <Upload className="size-5 text-gray-400" />
-                )}
+        <FormSection title="Photos" description="Photo upload is coming back soon.">
+          <div className="col-span-2">
+            <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-6 text-center">
+              <div className="flex size-10 items-center justify-center rounded-full bg-white shadow-sm mx-auto mb-2">
+                <ImageIcon className="size-4 text-slate-400" />
               </div>
-              {uploadingPhotos ? (
-                <p className="text-sm font-medium text-blue-600">Uploading photos…</p>
-              ) : photos.length >= 10 ? (
-                <p className="text-sm font-medium text-gray-500">10 photos uploaded (maximum reached)</p>
-              ) : (
-                <>
-                  <p className="text-sm font-medium text-gray-700">
-                    Click to upload or drag and drop
-                  </p>
-                  <p className="text-xs text-gray-400 mt-1">
-                    JPG, PNG, WebP accepted
-                  </p>
-                </>
-              )}
+              <p className="text-sm font-medium text-slate-700">Photo upload temporarily disabled</p>
+              <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
+                We&apos;re migrating image storage to a dedicated object store. In
+                the meantime, your listing will use a default property image and
+                you can add photos later from your listings page.
+              </p>
             </div>
-
-            {/* Upload hint */}
-            <p className="text-xs text-gray-500">
-              First photo will be used as the main listing image. Upload up to 10 photos.
-              {photos.length > 0 && (
-                <span className="ml-1 font-medium text-gray-700">{photos.length} photo{photos.length !== 1 ? 's' : ''} uploaded.</span>
-              )}
-            </p>
-
-            {/* Photo error */}
-            {photoError && (
-              <div className="rounded-lg bg-red-50 border border-red-200 px-3 py-2 text-xs text-red-700">
-                {photoError}
-              </div>
-            )}
-
-            {/* Thumbnail grid */}
-            {photos.length > 0 && (
-              <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
-                {photos.map((url, idx) => (
-                  <div key={url} className="relative group rounded-lg overflow-hidden border border-gray-200">
-                    <Image
-                      src={url}
-                      alt={`Photo ${idx + 1}`}
-                      width={200}
-                      height={150}
-                      className="object-cover w-full h-24"
-                    />
-                    {idx === 0 && (
-                      <span className="absolute bottom-1 left-1 rounded bg-black/60 px-1.5 py-0.5 text-[10px] text-white font-medium">
-                        Main
-                      </span>
-                    )}
-                    <button
-                      type="button"
-                      onClick={() => removePhoto(url)}
-                      className="absolute top-1 right-1 flex size-5 items-center justify-center rounded-full bg-black/60 text-white opacity-0 group-hover:opacity-100 transition-opacity"
-                      aria-label="Remove photo"
-                    >
-                      <X className="size-3" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
         </FormSection>
       </div>

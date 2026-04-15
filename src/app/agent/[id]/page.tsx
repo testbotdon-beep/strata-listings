@@ -4,7 +4,6 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import {
   Phone,
-  Mail,
   MessageCircle,
   Building2,
   Award,
@@ -15,7 +14,6 @@ import {
   MapPin,
   Globe,
 } from 'lucide-react'
-import { getAgentById } from '@/lib/data'
 import { getAgentListingsAsync, resolveAgent } from '@/lib/listings'
 import { whatsappUrl } from '@/lib/whatsapp'
 
@@ -23,7 +21,6 @@ export const dynamic = 'force-dynamic'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { ListingCard } from '@/components/listing-card'
-import { AgentContactForm } from '@/components/agent-contact-form'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -155,30 +152,32 @@ export default async function AgentProfilePage({ params }: PageProps) {
                 </div>
               </div>
 
-              {/* Quick actions */}
-              <div className="mt-5 flex flex-wrap justify-center gap-2 sm:justify-start">
+              {/* Quick actions — WhatsApp primary */}
+              <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:items-center">
+                <a
+                  href={whatsappUrl(
+                    agent.phone,
+                    `Hi ${agent.name}, I found your profile on Strata Listings and would like to chat about property.`
+                  )}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-emerald-600 transition-colors shadow-sm"
+                >
+                  <MessageCircle className="h-4 w-4" />
+                  Message on WhatsApp
+                </a>
                 <a
                   href={`tel:${agent.phone}`}
-                  className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-slate-700 transition-colors"
+                  className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
                 >
                   <Phone className="h-4 w-4" />
                   Call
                 </a>
                 <a
-                  href={whatsappUrl(agent.phone, `Hi ${agent.name}, I found your profile on Strata Listings and would like to chat about property.`)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 rounded-lg bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-600 transition-colors"
-                >
-                  <MessageCircle className="h-4 w-4" />
-                  WhatsApp
-                </a>
-                <a
                   href={`mailto:${agent.email}`}
-                  className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
+                  className="text-xs text-slate-500 hover:text-slate-700 underline underline-offset-2 px-2 py-2 sm:py-0 text-center sm:text-left"
                 >
-                  <Mail className="h-4 w-4" />
-                  Email
+                  or email
                 </a>
               </div>
             </div>
@@ -300,16 +299,57 @@ export default async function AgentProfilePage({ params }: PageProps) {
 
           {/* Right sidebar */}
           <aside className="lg:col-span-1">
-            <div className="sticky top-20 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-              <h3 className="text-base font-semibold text-slate-900 mb-1">
-                Contact {agent.name}
-              </h3>
-              <div className="flex items-center gap-1.5 mb-5">
-                <MapPin className="h-3.5 w-3.5 text-slate-400 shrink-0" />
-                <p className="text-xs text-slate-500">{agent.agency}</p>
+            <div className="sticky top-20 flex flex-col gap-4">
+              {/* Primary contact card */}
+              <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                <h3 className="text-base font-semibold text-slate-900 mb-1">
+                  Get in touch
+                </h3>
+                <p className="text-xs text-slate-500 mb-5">
+                  {agent.name} typically replies in under an hour.
+                </p>
+
+                <a
+                  href={whatsappUrl(
+                    agent.phone,
+                    `Hi ${agent.name}, I found your profile on Strata Listings and would like to chat about property.`
+                  )}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 rounded-xl bg-emerald-500 py-3 text-sm font-semibold text-white hover:bg-emerald-600 transition-colors shadow-sm mb-2.5"
+                >
+                  <MessageCircle className="h-5 w-5" />
+                  Message on WhatsApp
+                </a>
+
+                <a
+                  href={`tel:${agent.phone}`}
+                  className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors mb-4"
+                >
+                  <Phone className="h-4 w-4" />
+                  Call {agent.phone}
+                </a>
+
+                <div className="pt-3 border-t border-slate-100 text-center">
+                  <a
+                    href={`mailto:${agent.email}`}
+                    className="text-xs text-slate-500 hover:text-slate-700"
+                  >
+                    Prefer email? <span className="underline underline-offset-2">Send a message</span>
+                  </a>
+                </div>
               </div>
 
-              <AgentContactForm agentName={agent.name} agentId={agent.id} />
+              {/* Agency info card */}
+              <div className="rounded-2xl border border-slate-200 bg-slate-50/60 p-5">
+                <div className="flex items-center gap-2 mb-2">
+                  <MapPin className="h-4 w-4 text-slate-400" />
+                  <p className="text-sm font-semibold text-slate-900">{agent.agency}</p>
+                </div>
+                <p className="text-xs text-slate-500 leading-relaxed">
+                  CEA Licensed. {agent.listings_count} active listings on Strata Listings.
+                </p>
+              </div>
             </div>
           </aside>
 
