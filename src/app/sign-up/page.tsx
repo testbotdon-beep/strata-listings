@@ -98,7 +98,17 @@ function SignUpContent() {
             Create your agent account
           </h1>
           <p className="mt-2 text-sm text-slate-500">
-            $79/month for unlimited listings. Free if you&apos;re a Strata AI subscriber — use the same email.
+            $79/month for unlimited listings. Cancel anytime.
+          </p>
+        </div>
+
+        <div className="mb-4 rounded-xl border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-blue-50 p-4">
+          <p className="text-sm font-semibold text-slate-900">
+            Already paying for Strata AI?
+          </p>
+          <p className="mt-1 text-xs text-slate-600 leading-relaxed">
+            Sign up below with the <span className="font-semibold">same email</span> you use
+            on Strata AI and Listings unlocks free — no payment, no code, automatic.
           </p>
         </div>
 
@@ -138,6 +148,9 @@ function SignUpContent() {
                 required
                 className="h-10"
               />
+              <p className="text-xs text-slate-500">
+                Use the same email as your Strata AI account to unlock Listings free.
+              </p>
             </div>
 
             <div className="flex flex-col gap-1.5">

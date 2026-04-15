@@ -137,9 +137,9 @@ export default function ForAgentsPage() {
             {[
               {
                 step: '01',
-                title: 'Create your free account',
+                title: 'Sign up in 30 seconds',
                 description:
-                  'Sign up in 30 seconds. Add your CEA licence, agency, and contact details.',
+                  'Add your CEA licence, agency, and contact details. Already on Strata AI? Use the same email — Listings unlocks free, instantly.',
               },
               {
                 step: '02',
