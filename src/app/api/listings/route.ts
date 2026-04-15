@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { buildListing, saveListing, type NewListingPayload } from '@/lib/storage'
+import { buildListing, saveListing, getUserById, type NewListingPayload } from '@/lib/storage'
 import type { ListingType, PropertyType, FurnishingLevel } from '@/types/listing'
 import { auth } from '@/lib/auth'
+import { hasActiveSubscription } from '@/lib/subscription'
 
 const VALID_TYPES: ListingType[] = ['rent', 'sale']
 const VALID_PROPERTY_TYPES: PropertyType[] = ['hdb', 'condo', 'landed', 'commercial']
@@ -14,6 +15,19 @@ export async function POST(request: NextRequest) {
   const session = await auth()
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
+  }
+
+  // Subscription gate — only active agents can publish listings
+  const user = await getUserById(session.user.id)
+  if (!hasActiveSubscription(user)) {
+    return NextResponse.json(
+      {
+        error:
+          'Your account is not active. Subscribe or apply a promo code to publish listings.',
+        code: 'subscription_required',
+      },
+      { status: 402 }
+    )
   }
 
   let body: Partial<NewListingPayload>

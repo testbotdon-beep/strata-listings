@@ -31,6 +31,8 @@ const K = {
 
 // ─── TYPES ─────────────────────────────────────────────────
 
+export type SubscriptionStatus = 'trialing' | 'active' | 'past_due' | 'cancelled'
+
 export interface StoredUser {
   id: string
   email: string
@@ -42,6 +44,14 @@ export interface StoredUser {
   photo_url: string
   bio: string
   strata_agent_id: string | null
+  // Billing / subscription
+  subscription_status: SubscriptionStatus
+  subscription_source: 'promo' | 'stripe' | null
+  promo_code_used: string | null
+  stripe_customer_id: string | null
+  stripe_subscription_id: string | null
+  subscription_activated_at: string | null
+  subscription_ends_at: string | null
   created_at: string
 }
 

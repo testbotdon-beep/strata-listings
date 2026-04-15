@@ -12,33 +12,33 @@ import {
 export const metadata: Metadata = {
   title: 'For Agents — Strata Listings',
   description:
-    'List your properties free on Strata Listings. Save $500-1000/mo vs PropertyGuru. Buyers reach you directly on WhatsApp with full listing context.',
+    'Unlimited property listings for $79/month. 10× cheaper than PropertyGuru. Buyers reach you on WhatsApp with listing context pre-loaded.',
 }
 
 const FEATURES = [
   {
-    icon: ListChecks,
-    title: 'Free listings, forever',
+    icon: Zap,
+    title: 'Unlimited listings',
     description:
-      'No listing fees. No featured upgrades. Save $500-1000/mo compared to PropertyGuru. Your listings reach buyers through organic SEO and direct traffic.',
+      'Post as many properties as you want for one flat price. No per-listing credits, no daily fees, no "featured boost" upsells. Upload HDB, condo, landed, commercial — whatever you\'ve got.',
   },
   {
     icon: MessageCircle,
-    title: 'WhatsApp-first contact',
+    title: 'Buyers message you on WhatsApp',
     description:
-      'Buyers tap one button and message you directly on WhatsApp — with the listing title and URL pre-filled so you know exactly what they are interested in.',
+      'Every listing has a one-tap WhatsApp button that pre-fills the listing title and URL. You get leads on the platform you already use, with full context from the start.',
   },
   {
-    icon: Zap,
-    title: 'Pre-qualified lead context',
+    icon: ListChecks,
+    title: 'SEO-optimised discovery',
     description:
-      'Every WhatsApp inquiry arrives with the listing context baked in. If you already use Strata AI, your assistant picks up the conversation instantly with full listing data.',
+      'Your listings show up on Google searches for "Orchard condo", "Bishan HDB", "Jurong East landed" and every district. Free traffic, no ad spend.',
   },
   {
     icon: MapPin,
     title: 'Built for Singapore',
     description:
-      'HDB, condo, landed, commercial. Full district search, PSF insights, and CPF / ABSD calculators built in for every listing detail page.',
+      'Full district, MRT, and PSF search. Built-in TDSR, stamp duty, and mortgage calculators on every listing page. Buyers arrive pre-qualified.',
   },
 ]
 
@@ -57,15 +57,18 @@ export default function ForAgentsPage() {
 
             {/* Headline */}
             <h1 className="text-balance text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
-              List free. Reach buyers on WhatsApp.
+              Unlimited listings. $79/month.
             </h1>
 
             {/* Subtitle */}
             <p className="text-base text-slate-300 sm:text-lg leading-relaxed">
-              Singapore&apos;s property marketplace built around how agents
-              actually work. List properties for free, save $500-1000/mo vs
-              PropertyGuru, and get buyers messaging you directly on WhatsApp
-              with the listing context pre-loaded.
+              Singapore&apos;s property marketplace, built for agents. Post
+              unlimited listings for a tenth of what you&apos;re paying
+              PropertyGuru, with buyers reaching you directly on WhatsApp.
+              Already a Strata AI subscriber?{' '}
+              <span className="text-white font-semibold">
+                It&apos;s included free.
+              </span>
             </p>
 
             {/* CTA */}
@@ -74,7 +77,7 @@ export default function ForAgentsPage() {
                 href="/sign-up"
                 className="inline-flex items-center justify-center gap-2 rounded-lg bg-white px-6 py-3 text-sm font-semibold text-slate-900 hover:bg-slate-100 transition-colors"
               >
-                Get Started — It&apos;s Free
+                Start for $79/month
                 <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
@@ -169,59 +172,114 @@ export default function ForAgentsPage() {
 
       {/* ─── Pricing ───────────────────────────────────────────────── */}
       <section className="py-20 sm:py-24">
-        <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-2xl font-bold text-slate-900 sm:text-3xl mb-3">
-            Simple, transparent pricing
-          </h2>
-          <p className="text-slate-500 mb-10">
-            Strata Listings is free forever for agents. No hidden fees,
-            no featured upgrades, no commission on closed deals.
-          </p>
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-10">
+            <h2 className="text-2xl font-bold text-slate-900 sm:text-3xl mb-3">
+              Simple, transparent pricing
+            </h2>
+            <p className="text-slate-500 max-w-xl mx-auto">
+              One flat price. Unlimited listings. No ad credits, no boost
+              upsells, no commission on closed deals.
+            </p>
+          </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm text-left">
-            <div className="flex items-start justify-between gap-6 flex-wrap">
-              <div>
-                <p className="text-sm font-semibold text-emerald-600 uppercase tracking-wide mb-1">
-                  Free Forever
+          <div className="grid gap-5 md:grid-cols-2 items-stretch">
+            {/* Standalone plan */}
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 shadow-sm flex flex-col">
+              <div className="mb-6">
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">
+                  Strata Listings Pro
                 </p>
-                <p className="text-4xl font-bold text-slate-900">
-                  $0
-                  <span className="text-base font-normal text-slate-500">/month</span>
-                </p>
-                <p className="mt-1 text-sm text-slate-500">
-                  Unlimited listings. No credit card required.
+                <div className="flex items-baseline gap-2 flex-wrap">
+                  <span className="text-5xl font-bold text-slate-900">$79</span>
+                  <span className="text-base text-slate-500">/month</span>
+                </div>
+                <p className="mt-2 text-sm text-slate-500">
+                  Billed monthly. Cancel anytime.
                 </p>
               </div>
+
+              <ul className="space-y-2.5 mb-6 flex-1">
+                {[
+                  'Unlimited listings',
+                  'Unlimited photos per listing',
+                  'Agent profile page with all your properties',
+                  'WhatsApp click-to-chat on every listing',
+                  'Listing views + click analytics',
+                  'SEO-optimised pages (rank on Google)',
+                  'District, MRT, and PSF placement',
+                  'No commission on closed deals',
+                ].map((feature) => (
+                  <li key={feature} className="flex items-start gap-2 text-sm text-slate-700">
+                    <span className="mt-0.5 flex size-4 items-center justify-center rounded-full bg-emerald-100 shrink-0">
+                      <span className="size-1.5 rounded-full bg-emerald-500" />
+                    </span>
+                    {feature}
+                  </li>
+                ))}
+              </ul>
+
               <Link
                 href="/sign-up"
-                className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary/90 transition-colors"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-slate-900 bg-white px-5 py-3 text-sm font-semibold text-slate-900 hover:bg-slate-50 transition-colors"
               >
-                Get started
+                Start now — $79/mo
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
 
-            <div className="mt-6 border-t border-slate-100 pt-6 grid sm:grid-cols-2 gap-3">
-              {[
-                'Unlimited listings',
-                'Unlimited photos per listing',
-                'Agent profile page with all your listings',
-                'WhatsApp click-to-chat on every listing',
-                'District, MRT, and PSF search',
-                'SEO-optimised listing pages',
-                'Full dashboard with view analytics',
-                'No commission on closed deals',
-              ].map((feature) => (
-                <div key={feature} className="flex items-center gap-2 text-sm text-slate-600">
-                  <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 shrink-0" />
-                  {feature}
+            {/* Strata bundle */}
+            <div className="rounded-2xl border-2 border-primary bg-gradient-to-br from-primary/5 to-blue-50 p-6 sm:p-8 shadow-sm flex flex-col relative">
+              <span className="absolute -top-3 right-6 inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-white shadow-sm">
+                <Zap className="h-3 w-3" />
+                Best value
+              </span>
+              <div className="mb-6">
+                <p className="text-xs font-semibold text-primary uppercase tracking-wide mb-2">
+                  Strata AI + Listings
+                </p>
+                <div className="flex items-baseline gap-2 flex-wrap">
+                  <span className="text-5xl font-bold text-slate-900">$249</span>
+                  <span className="text-base text-slate-500">/month</span>
                 </div>
-              ))}
+                <p className="mt-2 text-sm text-slate-600">
+                  <span className="font-semibold text-slate-900">Listings included free</span>
+                  {' '}— normally $79/mo on its own.
+                </p>
+              </div>
+
+              <ul className="space-y-2.5 mb-6 flex-1">
+                {[
+                  'Everything in Strata Listings Pro',
+                  'Strata AI WhatsApp assistant',
+                  'AI qualifies buyers in under 5 seconds, 24/7',
+                  'Auto lead scoring + viewing scheduler',
+                  '300 AI-qualified leads per month',
+                  'Multi-channel — WhatsApp, Listings, PropertyGuru',
+                  'Full lead pipeline with one-click approvals',
+                  'Cancel anytime',
+                ].map((feature) => (
+                  <li key={feature} className="flex items-start gap-2 text-sm text-slate-700">
+                    <span className="mt-0.5 flex size-4 items-center justify-center rounded-full bg-primary/20 shrink-0">
+                      <span className="size-1.5 rounded-full bg-primary" />
+                    </span>
+                    {feature}
+                  </li>
+                ))}
+              </ul>
+
+              <Link
+                href="https://strata.uqlabs.co"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-white hover:bg-primary/90 transition-colors"
+              >
+                Learn about Strata AI
+                <ArrowRight className="h-4 w-4" />
+              </Link>
             </div>
           </div>
 
-          <p className="mt-4 text-xs text-slate-400">
-            Already use Strata AI for WhatsApp? Your Strata Listings account links automatically — buyer inquiries flow into your existing pipeline.
+          <p className="mt-8 text-center text-xs text-slate-400">
+            Already a Strata subscriber? Use your promo code at checkout to get Strata Listings free.
           </p>
         </div>
       </section>
@@ -235,10 +293,10 @@ export default function ForAgentsPage() {
             ))}
           </div>
           <blockquote className="text-lg font-medium text-slate-800 leading-relaxed mb-6">
-            &ldquo;I was paying PropertyGuru $800 a month for listings. Switched to
-            Strata Listings and now buyers message me directly on WhatsApp with
-            the listing title already in their first message. Zero downside,
-            massive savings.&rdquo;
+            &ldquo;I was paying PropertyGuru $800+ a month for listings. Strata
+            Listings is $79 for the same unlimited listings, and buyers message
+            me on WhatsApp with the listing title already in their first
+            message. I&apos;m saving $700/mo and closing more deals.&rdquo;
           </blockquote>
           <div className="flex items-center justify-center gap-3">
             <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-sm font-bold text-primary">

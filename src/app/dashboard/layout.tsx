@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useSession, signOut } from 'next-auth/react'
@@ -12,6 +12,8 @@ import {
   Settings,
   LogOut,
   Menu,
+  CreditCard,
+  AlertCircle,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
@@ -28,6 +30,7 @@ const NAV_LINKS = [
   { href: '/dashboard', label: 'Overview', icon: LayoutDashboard },
   { href: '/dashboard/listings', label: 'My Listings', icon: ListFilter },
   { href: '/dashboard/inquiries', label: 'Inquiries', icon: MessageSquare },
+  { href: '/dashboard/billing', label: 'Billing', icon: CreditCard },
   { href: '/dashboard/settings', label: 'Settings', icon: Settings },
 ]
 
@@ -111,13 +114,36 @@ function SidebarContent({
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const [mobileOpen, setMobileOpen] = useState(false)
-  const { data: session } = useSession()
+  const { data: session, status: sessionStatus } = useSession()
+  const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(null)
 
   const agent: SidebarAgent = {
     name: session?.user?.name ?? 'Agent',
     email: session?.user?.email ?? '',
     image: session?.user?.image,
   }
+
+  // Fetch subscription status for the banner
+  useEffect(() => {
+    if (sessionStatus !== 'authenticated') return
+    let cancelled = false
+    fetch('/api/users/me')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((u) => {
+        if (!cancelled && u?.subscription_status) {
+          setSubscriptionStatus(u.subscription_status)
+        }
+      })
+      .catch(() => {})
+    return () => {
+      cancelled = true
+    }
+  }, [sessionStatus, pathname])
+
+  const showActivationBanner =
+    subscriptionStatus !== null &&
+    subscriptionStatus !== 'active' &&
+    !pathname.startsWith('/dashboard/billing')
 
   const currentPage = NAV_LINKS.find((l) =>
     l.href === '/dashboard' ? pathname === '/dashboard' : pathname.startsWith(l.href)
@@ -185,6 +211,29 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
         {/* Page content */}
         <main className="flex-1 overflow-y-auto">
+          {showActivationBanner && (
+            <div className="border-b border-amber-200 bg-amber-50 px-4 py-3 sm:px-6">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+                <div className="flex items-start gap-2.5 flex-1 min-w-0">
+                  <AlertCircle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-amber-900">
+                      Activate your account to publish listings
+                    </p>
+                    <p className="text-xs text-amber-700 mt-0.5">
+                      Subscribe for $79/month or apply a promo code to get started.
+                    </p>
+                  </div>
+                </div>
+                <Link
+                  href="/dashboard/billing"
+                  className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-lg bg-amber-600 px-4 py-2 text-xs font-semibold text-white hover:bg-amber-700 transition-colors whitespace-nowrap"
+                >
+                  Activate account
+                </Link>
+              </div>
+            </div>
+          )}
           {children}
         </main>
       </div>

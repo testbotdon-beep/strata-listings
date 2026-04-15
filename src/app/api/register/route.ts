@@ -71,6 +71,15 @@ export async function POST(request: NextRequest) {
     photo_url,
     bio: '',
     strata_agent_id: null,
+    // New agents land in 'trialing' — they must subscribe (via Stripe or
+    // promo code) before they can publish listings
+    subscription_status: 'trialing',
+    subscription_source: null,
+    promo_code_used: null,
+    stripe_customer_id: null,
+    stripe_subscription_id: null,
+    subscription_activated_at: null,
+    subscription_ends_at: null,
     created_at: new Date().toISOString(),
   }
 

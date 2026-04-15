@@ -20,7 +20,8 @@ export default function SignUpPage() {
 function SignUpContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const callbackUrl = searchParams.get('callbackUrl') || '/dashboard'
+  // After signup, agents need to activate via Stripe or promo code
+  const callbackUrl = searchParams.get('callbackUrl') || '/dashboard/billing'
 
   const [form, setForm] = useState({
     name: '',
