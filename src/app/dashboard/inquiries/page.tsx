@@ -2,6 +2,7 @@ import { Mail, Phone, Clock, MessageSquare } from 'lucide-react'
 import { getInquiriesForAgent } from '@/lib/listings'
 import type { Inquiry } from '@/types/listing'
 import { InquiryDialog } from './inquiry-dialog'
+import { auth } from '@/lib/auth'
 
 export const dynamic = 'force-dynamic'
 
@@ -73,7 +74,9 @@ function InquiryRow({ inq }: { inq: Inquiry }) {
 }
 
 export default async function InquiriesPage() {
-  const inquiries = await getInquiriesForAgent('agent-1')
+  const session = await auth()
+  const agentId = session?.user?.id ?? 'agent-1'
+  const inquiries = await getInquiriesForAgent(agentId)
 
   const sorted = [...inquiries].sort(
     (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()

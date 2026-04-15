@@ -146,7 +146,6 @@ export default function NewListingPage() {
       mrt_nearest: form.mrt_nearest || undefined,
       mrt_distance_m: form.mrt_distance_m ? Number(form.mrt_distance_m) : undefined,
       status: mode === 'draft' ? 'draft' : 'active',
-      agent_id: 'agent-1', // hardcoded until auth lands
     }
 
     try {

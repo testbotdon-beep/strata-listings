@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useSession, signOut } from 'next-auth/react'
 import {
   Building2,
   LayoutDashboard,
@@ -23,12 +24,6 @@ import {
 } from '@/components/ui/sheet'
 import { cn } from '@/lib/utils'
 
-const AGENT = {
-  name: 'Sarah Chen',
-  photo_url: 'https://api.dicebear.com/9.x/notionists/svg?seed=Sarah&backgroundColor=c0aede',
-  agency: 'ERA Realty Network',
-}
-
 const NAV_LINKS = [
   { href: '/dashboard', label: 'Overview', icon: LayoutDashboard },
   { href: '/dashboard/listings', label: 'My Listings', icon: ListFilter },
@@ -36,7 +31,21 @@ const NAV_LINKS = [
   { href: '/dashboard/settings', label: 'Settings', icon: Settings },
 ]
 
-function SidebarContent({ pathname, onLinkClick }: { pathname: string; onLinkClick?: () => void }) {
+interface SidebarAgent {
+  name: string
+  email: string
+  image?: string | null
+}
+
+function SidebarContent({
+  pathname,
+  agent,
+  onLinkClick,
+}: {
+  pathname: string
+  agent: SidebarAgent
+  onLinkClick?: () => void
+}) {
   return (
     <div className="flex h-full flex-col">
       {/* Logo */}
@@ -75,16 +84,22 @@ function SidebarContent({ pathname, onLinkClick }: { pathname: string; onLinkCli
       <div className="border-t border-slate-800 p-4">
         <div className="flex items-center gap-3">
           <Avatar size="sm">
-            <AvatarImage src={AGENT.photo_url} alt={AGENT.name} />
+            {agent.image && <AvatarImage src={agent.image} alt={agent.name} />}
             <AvatarFallback className="bg-slate-700 text-slate-200 text-xs">
-              {AGENT.name.split(' ').map(n => n[0]).join('')}
+              {agent.name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-white truncate">{AGENT.name}</p>
-            <p className="text-xs text-slate-500 truncate">{AGENT.agency}</p>
+            <p className="text-sm font-medium text-white truncate">{agent.name}</p>
+            <p className="text-xs text-slate-500 truncate">{agent.email}</p>
           </div>
-          <Button variant="ghost" size="icon-sm" className="text-slate-500 hover:text-white hover:bg-slate-800 shrink-0">
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            onClick={() => signOut({ callbackUrl: '/' })}
+            className="text-slate-500 hover:text-white hover:bg-slate-800 shrink-0"
+            aria-label="Sign out"
+          >
             <LogOut className="size-3.5" />
           </Button>
         </div>
@@ -96,8 +111,15 @@ function SidebarContent({ pathname, onLinkClick }: { pathname: string; onLinkCli
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const [mobileOpen, setMobileOpen] = useState(false)
+  const { data: session } = useSession()
 
-  const currentPage = NAV_LINKS.find(l =>
+  const agent: SidebarAgent = {
+    name: session?.user?.name ?? 'Agent',
+    email: session?.user?.email ?? '',
+    image: session?.user?.image,
+  }
+
+  const currentPage = NAV_LINKS.find((l) =>
     l.href === '/dashboard' ? pathname === '/dashboard' : pathname.startsWith(l.href)
   )
 
@@ -105,7 +127,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     <div className="flex h-screen bg-gray-50 overflow-hidden">
       {/* Desktop Sidebar */}
       <aside className="hidden lg:flex w-60 shrink-0 flex-col bg-slate-900">
-        <SidebarContent pathname={pathname} />
+        <SidebarContent pathname={pathname} agent={agent} />
       </aside>
 
       {/* Main column */}
@@ -127,7 +149,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 <SheetHeader className="sr-only">
                   <SheetTitle>Navigation</SheetTitle>
                 </SheetHeader>
-                <SidebarContent pathname={pathname} onLinkClick={() => setMobileOpen(false)} />
+                <SidebarContent
+                  pathname={pathname}
+                  agent={agent}
+                  onLinkClick={() => setMobileOpen(false)}
+                />
               </SheetContent>
             </Sheet>
 
@@ -147,11 +173,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
           {/* Right side */}
           <div className="flex items-center gap-3">
-            <span className="hidden sm:block text-xs text-gray-500">{AGENT.agency}</span>
+            <span className="hidden sm:block text-xs text-gray-500">{agent.email}</span>
             <Avatar size="sm">
-              <AvatarImage src={AGENT.photo_url} alt={AGENT.name} />
+              {agent.image && <AvatarImage src={agent.image} alt={agent.name} />}
               <AvatarFallback className="bg-blue-100 text-blue-700 text-xs font-medium">
-                {AGENT.name.split(' ').map(n => n[0]).join('')}
+                {agent.name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()}
               </AvatarFallback>
             </Avatar>
           </div>

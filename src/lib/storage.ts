@@ -16,6 +16,93 @@ import type { Listing, Inquiry, ListingType, PropertyType, FurnishingLevel } fro
 
 const LISTINGS_PREFIX = 'listings/'
 const INQUIRIES_PREFIX = 'inquiries/'
+const USERS_PREFIX = 'users/'
+const USERS_BY_EMAIL_PREFIX = 'users-by-email/'
+
+// ─── USERS (AUTH) ──────────────────────────────────────────
+
+export interface StoredUser {
+  id: string
+  email: string
+  password_hash: string
+  name: string
+  agency: string
+  phone: string
+  license_no: string
+  photo_url: string
+  bio: string
+  strata_agent_id: string | null
+  created_at: string
+}
+
+export async function saveUser(user: StoredUser): Promise<void> {
+  // Write by id and by email (email lowercased) for lookup
+  const byId = `${USERS_PREFIX}${user.id}.json`
+  const byEmail = `${USERS_BY_EMAIL_PREFIX}${encodeURIComponent(user.email.toLowerCase())}.json`
+  const payload = JSON.stringify(user)
+  await Promise.all([
+    put(byId, payload, {
+      access: 'public',
+      contentType: 'application/json',
+      addRandomSuffix: false,
+      allowOverwrite: true,
+    }),
+    put(byEmail, payload, {
+      access: 'public',
+      contentType: 'application/json',
+      addRandomSuffix: false,
+      allowOverwrite: true,
+    }),
+  ])
+}
+
+export async function getUserByEmail(email: string): Promise<StoredUser | null> {
+  try {
+    const prefix = `${USERS_BY_EMAIL_PREFIX}${encodeURIComponent(email.toLowerCase())}`
+    const { blobs } = await list({ prefix })
+    if (blobs.length === 0) return null
+    const res = await fetch(blobs[0].url, { cache: 'no-store' })
+    if (!res.ok) return null
+    return (await res.json()) as StoredUser
+  } catch (err) {
+    console.error('[storage] getUserByEmail failed:', err)
+    return null
+  }
+}
+
+export async function getUserById(id: string): Promise<StoredUser | null> {
+  try {
+    const { blobs } = await list({ prefix: `${USERS_PREFIX}${id}` })
+    if (blobs.length === 0) return null
+    const res = await fetch(blobs[0].url, { cache: 'no-store' })
+    if (!res.ok) return null
+    return (await res.json()) as StoredUser
+  } catch (err) {
+    console.error('[storage] getUserById failed:', err)
+    return null
+  }
+}
+
+export async function getAllUsers(): Promise<StoredUser[]> {
+  try {
+    const { blobs } = await list({ prefix: USERS_PREFIX })
+    if (blobs.length === 0) return []
+    const results = await Promise.all(
+      blobs.map(async (blob) => {
+        try {
+          const res = await fetch(blob.url, { cache: 'no-store' })
+          if (!res.ok) return null
+          return (await res.json()) as StoredUser
+        } catch {
+          return null
+        }
+      })
+    )
+    return results.filter((u): u is StoredUser => u !== null)
+  } catch {
+    return []
+  }
+}
 
 export interface StoredListing extends Omit<Listing, 'agent'> {
   agent_id: string

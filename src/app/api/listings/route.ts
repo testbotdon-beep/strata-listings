@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { buildListing, saveListing, type NewListingPayload } from '@/lib/storage'
 import type { ListingType, PropertyType, FurnishingLevel } from '@/types/listing'
+import { auth } from '@/lib/auth'
 
 const VALID_TYPES: ListingType[] = ['rent', 'sale']
 const VALID_PROPERTY_TYPES: PropertyType[] = ['hdb', 'condo', 'landed', 'commercial']
@@ -10,6 +11,11 @@ const VALID_FURNISHING: FurnishingLevel[] = ['unfurnished', 'partial', 'fully']
 // Creates a new listing in Vercel Blob storage.
 // Currently uses agent_id from the request (no auth yet — Supabase Auth is the next step).
 export async function POST(request: NextRequest) {
+  const session = await auth()
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
+  }
+
   let body: Partial<NewListingPayload>
   try {
     body = await request.json()
@@ -58,8 +64,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid furnishing' }, { status: 400 })
   }
 
-  // Default agent for now (no auth). Will become req.user.id once auth is wired.
-  const agentId = body.agent_id || 'agent-1'
+  // Authenticated agent id from session (can't be spoofed by the client)
+  const agentId = session.user.id
 
   const listing = buildListing({
     agent_id: agentId,

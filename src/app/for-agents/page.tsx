@@ -70,7 +70,7 @@ export default function ForAgentsPage() {
             {/* CTA */}
             <div className="flex flex-col sm:flex-row gap-3 mt-2">
               <Link
-                href="/dashboard"
+                href="/sign-up"
                 className="inline-flex items-center justify-center gap-2 rounded-lg bg-white px-6 py-3 text-sm font-semibold text-slate-900 hover:bg-slate-100 transition-colors"
               >
                 Get Started — It&apos;s Free
@@ -192,7 +192,7 @@ export default function ForAgentsPage() {
                 </p>
               </div>
               <Link
-                href="/dashboard"
+                href="/sign-up"
                 className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary/90 transition-colors"
               >
                 Get started
@@ -261,7 +261,7 @@ export default function ForAgentsPage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link
-              href="/dashboard"
+              href="/sign-up"
               className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-white hover:bg-primary/90 transition-colors"
             >
               Sign up now

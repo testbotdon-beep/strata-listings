@@ -3,6 +3,7 @@ import { Plus, Eye, Edit, Trash2, MoreVertical } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { formatPrice } from '@/lib/data'
 import { getAgentListingsAsync } from '@/lib/listings'
+import { auth } from '@/lib/auth'
 
 export const dynamic = 'force-dynamic'
 import { PROPERTY_TYPE_LABELS, LISTING_TYPE_LABELS } from '@/types/listing'
@@ -23,7 +24,9 @@ function formatDate(iso: string): string {
 }
 
 export default async function ListingsPage() {
-  const listings = await getAgentListingsAsync('agent-1')
+  const session = await auth()
+  const agentId = session?.user?.id ?? 'agent-1'
+  const listings = await getAgentListingsAsync(agentId)
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">

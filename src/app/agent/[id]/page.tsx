@@ -16,7 +16,7 @@ import {
   Globe,
 } from 'lucide-react'
 import { getAgentById } from '@/lib/data'
-import { getAgentListingsAsync } from '@/lib/listings'
+import { getAgentListingsAsync, resolveAgent } from '@/lib/listings'
 
 export const dynamic = 'force-dynamic'
 import { Badge } from '@/components/ui/badge'
@@ -53,7 +53,7 @@ const AGENT_META: Record<
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params
-  const agent = getAgentById(id)
+  const agent = await resolveAgent(id)
   if (!agent) return { title: 'Agent not found — Strata Listings' }
 
   return {
@@ -64,7 +64,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function AgentProfilePage({ params }: PageProps) {
   const { id } = await params
-  const agent = getAgentById(id)
+  const agent = await resolveAgent(id)
 
   if (!agent) notFound()
 

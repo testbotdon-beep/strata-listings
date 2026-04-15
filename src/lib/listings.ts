@@ -5,8 +5,34 @@ import {
   getAgentById,
   getAgents,
 } from '@/lib/data'
-import { getStoredListings, getStoredInquiries } from '@/lib/storage'
+import { getStoredListings, getStoredInquiries, getUserById } from '@/lib/storage'
 import type { Listing, SearchFilters, Agent, Inquiry } from '@/types/listing'
+
+// Build an Agent object from a stored real user (from signup via /api/register)
+async function agentFromStoredUser(userId: string): Promise<Agent | null> {
+  const user = await getUserById(userId)
+  if (!user) return null
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    phone: user.phone,
+    agency: user.agency,
+    license_no: user.license_no,
+    photo_url: user.photo_url,
+    bio: user.bio || 'Property specialist on Strata Listings.',
+    listings_count: 0,
+    strata_agent_id: user.strata_agent_id,
+    created_at: user.created_at,
+  }
+}
+
+// Resolve an agent from either mock seed data or from the users store.
+export async function resolveAgent(agentId: string): Promise<Agent | null> {
+  const mock = getAgentById(agentId)
+  if (mock) return mock
+  return agentFromStoredUser(agentId)
+}
 
 // ─── LISTINGS ──────────────────────────────────────────────
 
@@ -18,12 +44,17 @@ import type { Listing, SearchFilters, Agent, Inquiry } from '@/types/listing'
  */
 export async function getAllListings(filters?: SearchFilters): Promise<Listing[]> {
   const stored = await getStoredListings()
-  const storedHydrated: Listing[] = stored
-    .filter((l) => l.status === 'active')
-    .map((l) => {
-      const agent = getAgentById(l.agent_id) ?? getAgents()[0]
-      return { ...l, agent }
-    })
+  // Hydrate each stored listing with its agent (mock OR real stored user)
+  const storedHydrated: Listing[] = (
+    await Promise.all(
+      stored
+        .filter((l) => l.status === 'active')
+        .map(async (l) => {
+          const agent = (await resolveAgent(l.agent_id)) ?? getAgents()[0]
+          return { ...l, agent }
+        })
+    )
+  )
 
   const mock = getMockListings()
   // Avoid duplicate IDs if any

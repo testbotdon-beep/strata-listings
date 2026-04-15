@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { getAgentById, formatPrice } from '@/lib/data'
 import { getAgentListingsAsync, getInquiriesForAgent } from '@/lib/listings'
+import { getCurrentUser } from '@/lib/auth'
 
 export const dynamic = 'force-dynamic'
 import { PROPERTY_TYPE_LABELS } from '@/types/listing'
@@ -43,9 +44,26 @@ const INQUIRY_STATUS_CONFIG = {
 }
 
 export default async function DashboardPage() {
-  const agent = getAgentById('agent-1')!
-  const listings = await getAgentListingsAsync('agent-1')
-  const inquiries = await getInquiriesForAgent('agent-1')
+  const currentUser = await getCurrentUser()
+  const agentId = currentUser?.id ?? 'agent-1'
+  // Use real user data if logged in, otherwise fall back to seeded mock agent for display
+  const agent = currentUser
+    ? {
+        id: currentUser.id,
+        name: currentUser.name,
+        email: currentUser.email,
+        phone: currentUser.phone,
+        agency: currentUser.agency,
+        license_no: currentUser.license_no,
+        photo_url: currentUser.photo_url,
+        bio: currentUser.bio,
+        listings_count: 0,
+        strata_agent_id: currentUser.strata_agent_id,
+        created_at: currentUser.created_at,
+      }
+    : getAgentById('agent-1')!
+  const listings = await getAgentListingsAsync(agentId)
+  const inquiries = await getInquiriesForAgent(agentId)
 
   const totalViews = listings.reduce((sum, l) => sum + l.views, 0)
   const newInquiries = inquiries.filter(i => i.status === 'new').length
