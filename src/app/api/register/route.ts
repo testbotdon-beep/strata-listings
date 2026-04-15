@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { getUserByEmail, saveUser, generateId, type StoredUser } from '@/lib/storage'
+import { isActiveStrataSubscriber } from '@/lib/strata-membership'
 
 interface RegisterPayload {
   email?: string
@@ -60,9 +61,18 @@ export async function POST(request: NextRequest) {
   const seed = encodeURIComponent(name.split(' ')[0])
   const photo_url = `https://api.dicebear.com/9.x/notionists/svg?seed=${seed}&backgroundColor=b6e3f4`
 
+  const normalizedEmail = email.toLowerCase().trim()
+
+  // Check if this email belongs to an active Strata subscriber.
+  // If yes, auto-activate their Listings account free — they're paying for
+  // Strata so they get Listings bundled. Real-time check against Stripe,
+  // cached for 5 minutes.
+  const strataCheck = await isActiveStrataSubscriber(normalizedEmail)
+  const isStrataSubscriber = strataCheck.isActiveSubscriber
+
   const user: StoredUser = {
     id: generateId('agent'),
-    email: email.toLowerCase().trim(),
+    email: normalizedEmail,
     password_hash,
     name: name.trim(),
     agency: agency.trim(),
@@ -71,14 +81,13 @@ export async function POST(request: NextRequest) {
     photo_url,
     bio: '',
     strata_agent_id: null,
-    // New agents land in 'trialing' — they must subscribe (via Stripe or
-    // promo code) before they can publish listings
-    subscription_status: 'trialing',
-    subscription_source: null,
-    promo_code_used: null,
-    stripe_customer_id: null,
+    // If this email matches a paying Strata subscriber, activate immediately.
+    // Otherwise they land in 'trialing' and must subscribe to $79/mo Listings.
+    subscription_status: isStrataSubscriber ? 'active' : 'trialing',
+    subscription_source: isStrataSubscriber ? 'strata_subscriber' : null,
+    stripe_customer_id: strataCheck.stripeCustomerId,
     stripe_subscription_id: null,
-    subscription_activated_at: null,
+    subscription_activated_at: isStrataSubscriber ? new Date().toISOString() : null,
     subscription_ends_at: null,
     created_at: new Date().toISOString(),
   }

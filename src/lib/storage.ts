@@ -46,8 +46,7 @@ export interface StoredUser {
   strata_agent_id: string | null
   // Billing / subscription
   subscription_status: SubscriptionStatus
-  subscription_source: 'promo' | 'stripe' | null
-  promo_code_used: string | null
+  subscription_source: 'strata_subscriber' | 'stripe' | 'admin' | null
   stripe_customer_id: string | null
   stripe_subscription_id: string | null
   subscription_activated_at: string | null

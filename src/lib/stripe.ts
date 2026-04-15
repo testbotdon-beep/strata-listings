@@ -3,8 +3,8 @@ import Stripe from 'stripe'
 
 /**
  * Lazily-initialised Stripe client. Returns null if STRIPE_SECRET_KEY is
- * not set — the rest of the app handles this gracefully (promo codes still
- * work, Stripe checkout shows a friendly "not configured" message).
+ * not set — the rest of the app handles this gracefully (Stripe checkout
+ * shows a friendly "not configured" message).
  */
 let _stripe: Stripe | null | undefined
 

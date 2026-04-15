@@ -28,7 +28,6 @@ export default async function BillingPage({ searchParams }: PageProps) {
         name: user.name,
         subscription_status: user.subscription_status,
         subscription_source: user.subscription_source,
-        promo_code_used: user.promo_code_used,
         subscription_activated_at: user.subscription_activated_at,
       }}
       plan={PLAN}

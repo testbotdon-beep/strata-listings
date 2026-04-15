@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         error:
-          'Your account is not active. Subscribe or apply a promo code to publish listings.',
+          'Your account is not active. Subscribe to publish listings.',
         code: 'subscription_required',
       },
       { status: 402 }

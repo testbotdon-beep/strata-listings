@@ -20,7 +20,7 @@ export default function SignUpPage() {
 function SignUpContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  // After signup, agents need to activate via Stripe or promo code
+  // After signup, agents land on billing unless their email matches an active Strata AI subscription
   const callbackUrl = searchParams.get('callbackUrl') || '/dashboard/billing'
 
   const [form, setForm] = useState({
@@ -98,7 +98,7 @@ function SignUpContent() {
             Create your agent account
           </h1>
           <p className="mt-2 text-sm text-slate-500">
-            List your properties free. Get instant buyer inquiries.
+            $79/month for unlimited listings. Free if you&apos;re a Strata AI subscriber — use the same email.
           </p>
         </div>
 

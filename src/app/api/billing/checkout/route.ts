@@ -8,8 +8,7 @@ import { getUserById, updateUser } from '@/lib/storage'
  * returns the session URL. Client redirects the browser to it.
  *
  * If Stripe isn't configured yet (no STRIPE_SECRET_KEY env var), returns
- * a 503 so the UI can show a friendly "coming soon" state. Promo codes
- * still work in that case.
+ * a 503 so the UI can show a friendly "coming soon" state.
  */
 export async function POST(request: NextRequest) {
   const session = await auth()
@@ -21,7 +20,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         error:
-          'Stripe is not configured yet. Use a promo code to activate your account, or contact support.',
+          'Stripe is not configured yet. Please contact support.',
       },
       { status: 503 }
     )

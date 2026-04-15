@@ -279,7 +279,7 @@ export default function ForAgentsPage() {
           </div>
 
           <p className="mt-8 text-center text-xs text-slate-400">
-            Already a Strata subscriber? Use your promo code at checkout to get Strata Listings free.
+            Already paying for Strata AI? Sign up with the same email — Strata Listings unlocks automatically, free.
           </p>
         </div>
       </section>

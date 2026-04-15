@@ -6,14 +6,12 @@ import {
   CheckCircle2,
   Loader2,
   CreditCard,
-  Ticket,
-  Sparkles,
   AlertCircle,
   ShieldCheck,
+  RefreshCw,
+  Sparkles,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import type { SubscriptionStatus } from '@/lib/storage'
 
 interface BillingUser {
@@ -21,8 +19,7 @@ interface BillingUser {
   email: string
   name: string
   subscription_status: SubscriptionStatus
-  subscription_source: 'promo' | 'stripe' | null
-  promo_code_used: string | null
+  subscription_source: 'strata_subscriber' | 'stripe' | 'admin' | null
   subscription_activated_at: string | null
 }
 
@@ -41,14 +38,22 @@ interface Props {
   canceled: boolean
 }
 
-export function BillingClient({ user, plan, stripeReady, success, canceled }: Props) {
+export function BillingClient({
+  user,
+  plan,
+  stripeReady,
+  success,
+  canceled,
+}: Props) {
   const router = useRouter()
-  const [promoCode, setPromoCode] = useState('')
-  const [promoLoading, setPromoLoading] = useState(false)
-  const [promoError, setPromoError] = useState<string | null>(null)
-  const [promoSuccess, setPromoSuccess] = useState<string | null>(null)
   const [stripeLoading, setStripeLoading] = useState(false)
   const [stripeError, setStripeError] = useState<string | null>(null)
+  const [recheckLoading, setRecheckLoading] = useState(false)
+  const [recheckResult, setRecheckResult] = useState<
+    | { type: 'success'; message: string }
+    | { type: 'info'; message: string }
+    | null
+  >(null)
 
   const isActive = user.subscription_status === 'active'
 
@@ -61,33 +66,6 @@ export function BillingClient({ user, plan, stripeReady, success, canceled }: Pr
       return () => clearTimeout(t)
     }
   }, [success, canceled, router])
-
-  async function handlePromoSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    if (!promoCode.trim()) return
-    setPromoLoading(true)
-    setPromoError(null)
-    setPromoSuccess(null)
-    try {
-      const res = await fetch('/api/billing/promo-code', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code: promoCode.trim() }),
-      })
-      const data = await res.json()
-      if (!res.ok) {
-        setPromoError(data.error || 'Could not apply promo code')
-      } else {
-        setPromoSuccess(data.message || 'Promo code applied!')
-        // Refresh server data so the rest of the dashboard unlocks
-        setTimeout(() => router.refresh(), 600)
-      }
-    } catch {
-      setPromoError('Network error. Please try again.')
-    } finally {
-      setPromoLoading(false)
-    }
-  }
 
   async function handleStripeCheckout() {
     setStripeLoading(true)
@@ -106,6 +84,46 @@ export function BillingClient({ user, plan, stripeReady, success, canceled }: Pr
       setStripeLoading(false)
     }
   }
+
+  async function handleRecheck() {
+    setRecheckLoading(true)
+    setRecheckResult(null)
+    try {
+      const res = await fetch('/api/billing/recheck', { method: 'POST' })
+      const data = await res.json()
+      if (res.ok && data.activated) {
+        setRecheckResult({
+          type: 'success',
+          message: 'Strata subscription found! Your account is now active.',
+        })
+        setTimeout(() => router.refresh(), 700)
+      } else if (res.ok && !data.activated) {
+        setRecheckResult({
+          type: 'info',
+          message:
+            'We couldn\'t find an active Strata subscription for this email. If you just subscribed, give it a minute and try again.',
+        })
+      } else {
+        setRecheckResult({
+          type: 'info',
+          message: data.error || 'Could not check subscription status.',
+        })
+      }
+    } catch {
+      setRecheckResult({ type: 'info', message: 'Network error. Please try again.' })
+    } finally {
+      setRecheckLoading(false)
+    }
+  }
+
+  const sourceLabel =
+    user.subscription_source === 'strata_subscriber'
+      ? 'Strata AI subscriber (free)'
+      : user.subscription_source === 'stripe'
+        ? 'Monthly subscription'
+        : user.subscription_source === 'admin'
+          ? 'Activated by admin'
+          : '—'
 
   return (
     <div className="p-4 sm:p-6 max-w-3xl mx-auto space-y-6">
@@ -135,7 +153,7 @@ export function BillingClient({ user, plan, stripeReady, success, canceled }: Pr
           <div className="text-sm">
             <p className="font-semibold text-amber-900">Checkout canceled</p>
             <p className="text-amber-700 mt-0.5">
-              No payment was taken. You can try again or use a promo code below.
+              No payment was taken. Try again when you&apos;re ready.
             </p>
           </div>
         </div>
@@ -180,23 +198,16 @@ export function BillingClient({ user, plan, stripeReady, success, canceled }: Pr
               <p className="text-xs text-slate-500">Activated</p>
               <p className="font-medium text-slate-900">
                 {user.subscription_activated_at
-                  ? new Date(user.subscription_activated_at).toLocaleDateString('en-SG', {
-                      day: 'numeric',
-                      month: 'short',
-                      year: 'numeric',
-                    })
+                  ? new Date(user.subscription_activated_at).toLocaleDateString(
+                      'en-SG',
+                      { day: 'numeric', month: 'short', year: 'numeric' }
+                    )
                   : '—'}
               </p>
             </div>
             <div>
               <p className="text-xs text-slate-500">Source</p>
-              <p className="font-medium text-slate-900 capitalize">
-                {user.subscription_source === 'promo'
-                  ? `Promo code (${user.promo_code_used})`
-                  : user.subscription_source === 'stripe'
-                    ? 'Monthly subscription'
-                    : '—'}
-              </p>
+              <p className="font-medium text-slate-900">{sourceLabel}</p>
             </div>
           </div>
         )}
@@ -207,33 +218,34 @@ export function BillingClient({ user, plan, stripeReady, success, canceled }: Pr
         <>
           {/* Plan pricing card */}
           <div className="rounded-2xl border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-blue-50 p-5 sm:p-8">
-            <div className="flex items-start justify-between gap-4 flex-wrap mb-4">
-              <div>
-                <p className="text-xs font-semibold text-primary uppercase tracking-wide">
-                  {plan.name}
-                </p>
-                <div className="mt-2 flex items-baseline gap-2 flex-wrap">
-                  <span className="text-4xl sm:text-5xl font-bold text-slate-900">
-                    ${plan.priceMonthly}
-                  </span>
-                  <span className="text-base text-slate-500">/month</span>
-                </div>
-                <p className="mt-2 text-sm text-slate-600">{plan.tagline}</p>
+            <div className="mb-4">
+              <p className="text-xs font-semibold text-primary uppercase tracking-wide">
+                {plan.name}
+              </p>
+              <div className="mt-2 flex items-baseline gap-2 flex-wrap">
+                <span className="text-4xl sm:text-5xl font-bold text-slate-900">
+                  ${plan.priceMonthly}
+                </span>
+                <span className="text-base text-slate-500">/month</span>
               </div>
+              <p className="mt-2 text-sm text-slate-600">{plan.tagline}</p>
             </div>
 
             <ul className="space-y-2 mb-6">
               {[
                 'Unlimited listings',
-                'Unlimited agent profile page',
+                'Agent profile page with all your listings',
                 'WhatsApp click-to-chat on every listing',
-                'Listing view + inquiry analytics',
+                'Listing views + inquiry analytics',
                 'SEO-optimised listing pages',
                 'District, MRT, and PSF search placement',
                 'No commission on closed deals',
                 'Cancel anytime',
               ].map((feature) => (
-                <li key={feature} className="flex items-start gap-2 text-sm text-slate-700">
+                <li
+                  key={feature}
+                  className="flex items-start gap-2 text-sm text-slate-700"
+                >
                   <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
                   <span>{feature}</span>
                 </li>
@@ -260,7 +272,7 @@ export function BillingClient({ user, plan, stripeReady, success, canceled }: Pr
 
             {!stripeReady && (
               <p className="mt-3 text-xs text-center text-slate-500">
-                Card payment will be enabled soon. In the meantime, use a promo code below to activate your account.
+                Card payment will be enabled shortly.
               </p>
             )}
 
@@ -276,72 +288,62 @@ export function BillingClient({ user, plan, stripeReady, success, canceled }: Pr
             </p>
           </div>
 
-          {/* Promo code card */}
+          {/* Strata subscriber recheck card */}
           <div className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6">
             <div className="flex items-center gap-2 mb-3">
-              <Ticket className="h-5 w-5 text-primary" />
-              <h2 className="text-base font-semibold text-slate-900">Have a promo code?</h2>
+              <Sparkles className="h-5 w-5 text-primary" />
+              <h2 className="text-base font-semibold text-slate-900">
+                Already paying for Strata AI?
+              </h2>
             </div>
-            <p className="text-sm text-slate-600 mb-4">
-              If you&apos;re already a{' '}
-              <span className="font-semibold text-slate-900">Strata AI</span>{' '}
-              subscriber, enter your code below to activate Strata Listings for free.
+            <p className="text-sm text-slate-600 mb-4 leading-relaxed">
+              Strata Listings is included free with your Strata AI subscription.
+              We check automatically using your email{' '}
+              <span className="font-semibold text-slate-900">{user.email}</span>
+              . If you just subscribed to Strata, click below to re-check.
             </p>
 
-            {promoSuccess ? (
-              <div className="rounded-lg bg-emerald-50 border border-emerald-200 px-4 py-3 flex items-start gap-2">
-                <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0 mt-0.5" />
-                <div className="text-sm">
-                  <p className="font-semibold text-emerald-900">{promoSuccess}</p>
-                  <p className="text-emerald-700 text-xs mt-0.5">
-                    Refreshing your account…
-                  </p>
-                </div>
+            {recheckResult && (
+              <div
+                className={
+                  recheckResult.type === 'success'
+                    ? 'mb-3 rounded-lg bg-emerald-50 border border-emerald-200 px-3 py-2 text-xs text-emerald-800'
+                    : 'mb-3 rounded-lg bg-slate-50 border border-slate-200 px-3 py-2 text-xs text-slate-700'
+                }
+              >
+                {recheckResult.message}
               </div>
-            ) : (
-              <form onSubmit={handlePromoSubmit} className="flex flex-col sm:flex-row gap-2">
-                <div className="flex-1">
-                  <Label htmlFor="promo-code" className="sr-only">
-                    Promo code
-                  </Label>
-                  <Input
-                    id="promo-code"
-                    type="text"
-                    placeholder="Enter code e.g. STRATA"
-                    value={promoCode}
-                    onChange={(e) => {
-                      setPromoCode(e.target.value.toUpperCase())
-                      if (promoError) setPromoError(null)
-                    }}
-                    className="h-11 uppercase tracking-wider font-mono"
-                    autoComplete="off"
-                  />
-                </div>
-                <Button
-                  type="submit"
-                  disabled={promoLoading || !promoCode.trim()}
-                  className="h-11 font-semibold gap-2 sm:w-auto"
-                >
-                  {promoLoading ? (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      Applying…
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="h-4 w-4" />
-                      Apply code
-                    </>
-                  )}
-                </Button>
-              </form>
             )}
 
-            {promoError && (
-              <div className="mt-3 rounded-lg bg-red-50 border border-red-200 px-3 py-2 text-xs text-red-700">
-                {promoError}
-              </div>
-            )}
+            <Button
+              onClick={handleRecheck}
+              disabled={recheckLoading}
+              variant="outline"
+              className="w-full h-10 gap-2"
+            >
+              {recheckLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Checking Stripe…
+                </>
+              ) : (
+                <>
+                  <RefreshCw className="h-4 w-4" />
+                  Recheck Strata subscription
+                </>
+              )}
+            </Button>
+
+            <p className="mt-3 text-xs text-slate-500 leading-relaxed">
+              Not on Strata but using a different email?{' '}
+              <a
+                href="mailto:hello@strata-listings.sg?subject=Link%20Strata%20account"
+                className="text-primary underline underline-offset-2"
+              >
+                Contact support
+              </a>{' '}
+              and we&apos;ll link your accounts manually.
+            </p>
           </div>
         </>
       )}

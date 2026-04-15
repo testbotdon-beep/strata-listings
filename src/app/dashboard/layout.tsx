@@ -221,7 +221,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                       Activate your account to publish listings
                     </p>
                     <p className="text-xs text-amber-700 mt-0.5">
-                      Subscribe for $79/month or apply a promo code to get started.
+                      Subscribe for $79/month — free if you&apos;re a Strata AI subscriber.
                     </p>
                   </div>
                 </div>
