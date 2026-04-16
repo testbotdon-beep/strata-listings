@@ -203,10 +203,13 @@ async function signInDemoAgent(page: import('@playwright/test').Page) {
   await page.locator('#password').fill(TEST_AGENT.password)
   await page.locator('main button:has-text("Sign in")').click()
   await page.waitForURL(/dashboard/, { timeout: 30000, waitUntil: 'domcontentloaded' })
-  // Test agents land in 'trialing'. Activate via promo code so they can
+  // Test agents land in 'trialing'. Activate via admin endpoint so they can
   // create listings in the tests below.
-  await page.request.post(`${BASE}/api/billing/promo-code`, {
-    data: { code: 'STRATA' },
+  await page.request.post(`${BASE}/api/admin/activate`, {
+    data: { email: TEST_AGENT.email },
+    headers: {
+      'x-admin-token': process.env.ADMIN_TOKEN || 'test-admin-token',
+    },
   })
 }
 

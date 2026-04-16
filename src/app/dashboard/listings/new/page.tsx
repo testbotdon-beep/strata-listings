@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import Link from 'next/link'
-import { Image as ImageIcon, X, CheckCircle2, ChevronLeft } from 'lucide-react'
+import { Image as ImageIcon, X, CheckCircle2, ChevronLeft, Upload, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -95,6 +95,56 @@ export default function NewListingPage() {
   const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [createdListing, setCreatedListing] = useState<{ id: string } | null>(null)
+  const [photos, setPhotos] = useState<string[]>([])
+  const [photoUploading, setPhotoUploading] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  async function compressAndUpload(file: File) {
+    setPhotoUploading(true)
+    try {
+      const bitmap = await createImageBitmap(file)
+      const maxDim = 1200
+      let w = bitmap.width
+      let h = bitmap.height
+      if (w > maxDim || h > maxDim) {
+        const ratio = Math.min(maxDim / w, maxDim / h)
+        w = Math.round(w * ratio)
+        h = Math.round(h * ratio)
+      }
+      const canvas = new OffscreenCanvas(w, h)
+      const ctx = canvas.getContext('2d')!
+      ctx.drawImage(bitmap, 0, 0, w, h)
+      const blob = await canvas.convertToBlob({ type: 'image/jpeg', quality: 0.75 })
+      const reader = new FileReader()
+      const dataUrl = await new Promise<string>((resolve) => {
+        reader.onload = () => resolve(reader.result as string)
+        reader.readAsDataURL(blob)
+      })
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ data: dataUrl, name: file.name, type: 'image/jpeg' }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Upload failed')
+      setPhotos((prev) => [...prev, data.url])
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Photo upload failed')
+    } finally {
+      setPhotoUploading(false)
+    }
+  }
+
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = e.target.files
+    if (!files) return
+    if (photos.length + files.length > 8) {
+      setError('Maximum 8 photos per listing')
+      return
+    }
+    Array.from(files).forEach((f) => compressAndUpload(f))
+    e.target.value = ''
+  }
 
   const update = <K extends keyof FormState>(key: K, value: FormState[K]) => {
     setForm((prev) => ({ ...prev, [key]: value }))
@@ -138,7 +188,7 @@ export default function NewListingPage() {
       district: Number(form.district),
       postal_code: form.postal_code.trim(),
       amenities: selectedAmenities,
-      photos: [], // Photo upload temporarily disabled — listings use a default image
+      photos,
       furnishing: form.furnishing,
       floor_level: form.floor_level || undefined,
       tenure: form.tenure || undefined,
@@ -477,19 +527,59 @@ export default function NewListingPage() {
           </div>
         </FormSection>
 
-        <FormSection title="Photos" description="Photo upload is coming back soon.">
+        <FormSection title="Photos" description="Upload up to 8 photos. They'll be compressed automatically.">
           <div className="col-span-2">
-            <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-6 text-center">
-              <div className="flex size-10 items-center justify-center rounded-full bg-white shadow-sm mx-auto mb-2">
-                <ImageIcon className="size-4 text-slate-400" />
+            {photos.length > 0 && (
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+                {photos.map((url, i) => (
+                  <div key={url} className="relative group aspect-[4/3] rounded-lg overflow-hidden bg-slate-100">
+                    <img src={url} alt={`Photo ${i + 1}`} className="w-full h-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => setPhotos((prev) => prev.filter((_, j) => j !== i))}
+                      className="absolute top-1.5 right-1.5 flex size-6 items-center justify-center rounded-full bg-black/60 text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <X className="size-3.5" />
+                    </button>
+                    {i === 0 && (
+                      <span className="absolute bottom-1.5 left-1.5 text-[10px] font-semibold bg-black/60 text-white px-1.5 py-0.5 rounded">
+                        Cover
+                      </span>
+                    )}
+                  </div>
+                ))}
               </div>
-              <p className="text-sm font-medium text-slate-700">Photo upload temporarily disabled</p>
-              <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
-                We&apos;re migrating image storage to a dedicated object store. In
-                the meantime, your listing will use a default property image and
-                you can add photos later from your listings page.
-              </p>
-            </div>
+            )}
+
+            {photos.length < 8 && (
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={photoUploading}
+                className="w-full rounded-xl border border-dashed border-slate-300 bg-slate-50 hover:bg-slate-100 transition-colors p-6 text-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {photoUploading ? (
+                  <Loader2 className="size-5 text-slate-400 mx-auto mb-2 animate-spin" />
+                ) : (
+                  <Upload className="size-5 text-slate-400 mx-auto mb-2" />
+                )}
+                <p className="text-sm font-medium text-slate-700">
+                  {photoUploading ? 'Uploading…' : 'Click to upload photos'}
+                </p>
+                <p className="text-xs text-slate-500 mt-1">
+                  JPG or PNG, max 8 photos. Auto-compressed to save space.
+                </p>
+              </button>
+            )}
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              multiple
+              className="hidden"
+              onChange={handleFileChange}
+            />
           </div>
         </FormSection>
       </div>
