@@ -41,23 +41,20 @@ export function ContactForm() {
     if (!validate()) return
     setSubmitting(true)
     try {
-      const res = await fetch('/api/contact', {
+      const res = await fetch('https://formsubmit.co/ajax/kevan@uqlabs.co', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify({
+          name: form.name,
+          email: form.email,
+          message: form.message,
+          _subject: `Strata Listings — ${form.name}`,
+        }),
       })
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}))
-        throw new Error(data.error || 'Submission failed')
-      }
+      if (!res.ok) throw new Error('Submission failed')
       setSubmitted(true)
-    } catch (err) {
-      setErrors({
-        message:
-          err instanceof Error
-            ? err.message
-            : 'Could not send message. Please try again.',
-      })
+    } catch {
+      setErrors({ message: 'Could not send message. Please try again.' })
     } finally {
       setSubmitting(false)
     }
