@@ -161,6 +161,21 @@ export default async function HomePage() {
 
   return (
     <div className="flex flex-col">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'WebSite',
+          name: 'Strata Listings',
+          url: 'https://listings.uqlabs.co',
+          description: "Singapore's trusted property marketplace.",
+          potentialAction: {
+            '@type': 'SearchAction',
+            target: 'https://listings.uqlabs.co/listings?q={search_term_string}',
+            'query-input': 'required name=search_term_string',
+          },
+        }) }}
+      />
       {/* ─── Hero ──────────────────────────────────────────────────── */}
       <section className="bg-gradient-to-b from-slate-50 via-white to-white">
         <div className="mx-auto max-w-7xl px-4 pt-16 pb-14 sm:px-6 sm:pt-24 sm:pb-20 lg:px-8 lg:pt-28">

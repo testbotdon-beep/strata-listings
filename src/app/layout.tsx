@@ -18,6 +18,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://listings.uqlabs.co'),
+  alternates: { canonical: '/' },
   title: {
     default: 'Strata Listings — Singapore Property',
     template: '%s | Strata Listings',
@@ -65,6 +66,16 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'Organization',
+            name: 'Strata Listings',
+            url: 'https://listings.uqlabs.co',
+            description: "Singapore's trusted property marketplace with verified CEA-licensed agents.",
+          }) }}
+        />
         <Providers>
           <Header />
           <main className="flex-1">{children}</main>

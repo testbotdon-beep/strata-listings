@@ -144,20 +144,23 @@ export default async function ListingDetailPage({ params }: PageProps) {
 
   const jsonLd = {
     '@context': 'https://schema.org',
-    '@type': 'Product',
+    '@type': 'RealEstateListing',
     name: listing.title,
     description: listing.description.slice(0, 200),
+    url: `https://listings.uqlabs.co/listing/${id}`,
     image: listing.photos[0],
     offers: {
       '@type': 'Offer',
       price: listing.price,
       priceCurrency: 'SGD',
-      availability: 'https://schema.org/InStock',
     },
-    brand: {
-      '@type': 'RealEstateAgent',
-      name: listing.agent.name,
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: listing.address,
+      addressLocality: 'Singapore',
+      addressCountry: 'SG',
     },
+    numberOfRooms: listing.bedrooms,
   }
 
   return (
