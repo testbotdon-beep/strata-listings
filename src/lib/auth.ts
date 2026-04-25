@@ -1,8 +1,60 @@
 import NextAuth from 'next-auth'
 import Credentials from 'next-auth/providers/credentials'
 import bcrypt from 'bcryptjs'
-import { getUserByEmail, getUserById, updateUser } from '@/lib/storage'
+import { createClient } from '@supabase/supabase-js'
+import { getUserByEmail, getUserById, updateUser, saveUser, type StoredUser } from '@/lib/storage'
 import { isActiveStrataSubscriber } from '@/lib/strata-membership'
+
+/**
+ * Try authenticating against the Strata Supabase project. Returns a Listings user
+ * if the credentials match a Strata account (provisioning a Listings record on
+ * the fly when one doesn't yet exist). Returns null otherwise.
+ */
+async function trySupabaseLogin(email: string, password: string): Promise<StoredUser | null> {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  if (!url || !anon) return null
+
+  const supabase = createClient(url, anon, { auth: { persistSession: false } })
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+  if (error || !data?.user) return null
+
+  const normalized = email.toLowerCase().trim()
+  let listingsUser = await getUserByEmail(normalized)
+  if (!listingsUser) {
+    const meta = (data.user.user_metadata ?? {}) as Record<string, unknown>
+    const name = (meta.full_name as string) || normalized.split('@')[0]
+    const seed = encodeURIComponent(name.split(' ')[0])
+
+    const strataCheck = await isActiveStrataSubscriber(normalized).catch(() => ({
+      isActiveSubscriber: false,
+      stripeCustomerId: null,
+    }))
+
+    listingsUser = {
+      id: `agent_${data.user.id}`,
+      email: normalized,
+      // Random unmatchable hash. This user authenticates via Supabase, never bcrypt.
+      password_hash: '$2b$10$strataAuthOnlyDoNotUseThisHashEver000000000000000000000',
+      name,
+      agency: '',
+      phone: '',
+      license_no: '',
+      photo_url: `https://api.dicebear.com/9.x/notionists/svg?seed=${seed}&backgroundColor=b6e3f4`,
+      bio: '',
+      strata_agent_id: null,
+      subscription_status: strataCheck.isActiveSubscriber ? 'active' : 'trialing',
+      subscription_source: strataCheck.isActiveSubscriber ? 'strata_subscriber' : null,
+      stripe_customer_id: strataCheck.stripeCustomerId,
+      stripe_subscription_id: null,
+      subscription_activated_at: strataCheck.isActiveSubscriber ? new Date().toISOString() : null,
+      subscription_ends_at: null,
+      created_at: new Date().toISOString(),
+    }
+    await saveUser(listingsUser)
+  }
+  return listingsUser
+}
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   session: {
@@ -23,6 +75,19 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         const password = credentials?.password as string | undefined
         if (!email || !password) return null
 
+        // 1. Try Strata (Supabase) first — single password works across the suite.
+        // If it matches, we get/provision a Listings user record by email.
+        const strataUser = await trySupabaseLogin(email, password)
+        if (strataUser) {
+          return {
+            id: strataUser.id,
+            name: strataUser.name,
+            email: strataUser.email,
+            image: strataUser.photo_url,
+          }
+        }
+
+        // 2. Fallback: existing Listings-only account with bcrypt password.
         const user = await getUserByEmail(email)
         if (!user) return null
 
