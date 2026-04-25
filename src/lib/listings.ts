@@ -181,6 +181,18 @@ function applyFilters(listings: Listing[], filters?: SearchFilters): Listing[] {
       l.mrt_nearest?.toLowerCase().includes(filters.mrt!.toLowerCase())
     )
   }
+  if (filters?.hdb_type) {
+    results = results.filter((l) => l.hdb_type === filters.hdb_type)
+  }
+  if (filters?.furnishing) {
+    results = results.filter((l) => l.furnishing === filters.furnishing)
+  }
+  if (filters?.pets_allowed !== undefined) {
+    results = results.filter((l) => l.pets_allowed === filters.pets_allowed)
+  }
+  if (filters?.cooking_allowed !== undefined) {
+    results = results.filter((l) => l.cooking_allowed === filters.cooking_allowed)
+  }
   if (filters?.query) {
     const q = filters.query.toLowerCase()
     results = results.filter(

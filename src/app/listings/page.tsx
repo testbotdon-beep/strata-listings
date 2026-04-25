@@ -56,6 +56,12 @@ export default async function ListingsPage({ searchParams }: PageProps) {
   }
   if (params.mrt) filters.mrt = params.mrt
   if (params.q) filters.query = params.q
+  if (params.hdb_type) filters.hdb_type = params.hdb_type as SearchFilters['hdb_type']
+  if (params.furnishing) filters.furnishing = params.furnishing as SearchFilters['furnishing']
+  if (params.pets_allowed === 'true') filters.pets_allowed = true
+  else if (params.pets_allowed === 'false') filters.pets_allowed = false
+  if (params.cooking_allowed === 'true') filters.cooking_allowed = true
+  else if (params.cooking_allowed === 'false') filters.cooking_allowed = false
   if (
     params.sort === 'newest' ||
     params.sort === 'price_asc' ||

@@ -17,8 +17,10 @@ import {
   SG_DISTRICTS,
   PROPERTY_TYPE_LABELS,
   POPULAR_MRTS,
+  HDB_TYPE_LABELS,
+  FURNISHING_LABELS,
 } from '@/types/listing'
-import type { ListingType, PropertyType } from '@/types/listing'
+import type { ListingType, PropertyType, HdbType, FurnishingLevel } from '@/types/listing'
 import { cn } from '@/lib/utils'
 
 const BEDROOM_OPTIONS = [
@@ -54,6 +56,10 @@ export function ListingFilters({ className }: ListingFiltersProps) {
   const district = searchParams.get('district') ?? ''
   const mrt = searchParams.get('mrt') ?? ''
   const sort = searchParams.get('sort') ?? 'newest'
+  const hdbType = (searchParams.get('hdb_type') as HdbType) ?? ''
+  const furnishing = (searchParams.get('furnishing') as FurnishingLevel) ?? ''
+  const petsAllowed = searchParams.get('pets_allowed') ?? ''
+  const cookingAllowed = searchParams.get('cooking_allowed') ?? ''
 
   const updateParams = useCallback(
     (updates: Record<string, string | null>) => {
@@ -75,7 +81,8 @@ export function ListingFilters({ className }: ListingFiltersProps) {
   }
 
   const hasActiveFilters =
-    propertyType || minPrice || maxPrice || bedrooms || district || mrt
+    propertyType || minPrice || maxPrice || bedrooms || district || mrt ||
+    hdbType || furnishing || petsAllowed || cookingAllowed
 
   const filterContent = (
     <div className="flex flex-col gap-5">
@@ -220,6 +227,101 @@ export function ListingFilters({ className }: ListingFiltersProps) {
           </SelectContent>
         </Select>
       </div>
+
+      {/* HDB Type — only when HDB selected */}
+      {propertyType === 'hdb' && (
+        <div className="flex flex-col gap-2">
+          <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            HDB type
+          </Label>
+          <Select value={hdbType || undefined} onValueChange={(v) => updateParams({ hdb_type: v })}>
+            <SelectTrigger className="h-8 w-full text-sm">
+              <SelectValue placeholder="Any HDB type" />
+            </SelectTrigger>
+            <SelectContent>
+              {Object.entries(HDB_TYPE_LABELS).map(([value, label]) => (
+                <SelectItem key={value} value={value}>{label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
+
+      {/* Furnishing */}
+      <div className="flex flex-col gap-2">
+        <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          Furnishing
+        </Label>
+        <Select value={furnishing || undefined} onValueChange={(v) => updateParams({ furnishing: v })}>
+          <SelectTrigger className="h-8 w-full text-sm">
+            <SelectValue placeholder="Any" />
+          </SelectTrigger>
+          <SelectContent>
+            {Object.entries(FURNISHING_LABELS).map(([value, label]) => (
+              <SelectItem key={value} value={value}>{label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Rental-only filters */}
+      {type === 'rent' && (
+        <>
+          <div className="flex flex-col gap-2">
+            <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Pets allowed
+            </Label>
+            <div className="flex rounded-lg bg-muted p-0.5">
+              {[
+                { val: '', label: 'Any' },
+                { val: 'true', label: 'Yes' },
+                { val: 'false', label: 'No' },
+              ].map((o) => (
+                <button
+                  key={o.val}
+                  type="button"
+                  onClick={() => updateParams({ pets_allowed: o.val })}
+                  className={cn(
+                    'flex-1 rounded-md py-1.5 text-xs font-medium transition-all',
+                    petsAllowed === o.val
+                      ? 'bg-white text-foreground shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground'
+                  )}
+                >
+                  {o.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Cooking allowed
+            </Label>
+            <div className="flex rounded-lg bg-muted p-0.5">
+              {[
+                { val: '', label: 'Any' },
+                { val: 'true', label: 'Yes' },
+                { val: 'false', label: 'No' },
+              ].map((o) => (
+                <button
+                  key={o.val}
+                  type="button"
+                  onClick={() => updateParams({ cooking_allowed: o.val })}
+                  className={cn(
+                    'flex-1 rounded-md py-1.5 text-xs font-medium transition-all',
+                    cookingAllowed === o.val
+                      ? 'bg-white text-foreground shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground'
+                  )}
+                >
+                  {o.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Sort */}
       <div className="flex flex-col gap-2">
