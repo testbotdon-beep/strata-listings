@@ -62,7 +62,7 @@ function SignInContent() {
           </Link>
           <h1 className="text-2xl font-bold text-slate-900">Welcome back</h1>
           <p className="mt-2 text-sm text-slate-500">
-            Sign in to manage your listings and inquiries.
+            One account for Strata, PropReels, ReelMaker and Listings.
           </p>
         </div>
 
