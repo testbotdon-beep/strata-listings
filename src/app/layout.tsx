@@ -5,6 +5,7 @@ import './globals.css'
 import { Header } from '@/components/layout/header'
 import { Footer } from '@/components/layout/footer'
 import { Providers } from '@/components/providers'
+import { UniqHeader } from '@/components/uniq-header'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -77,6 +78,7 @@ export default function RootLayout({
           }) }}
         />
         <Providers>
+          <UniqHeader active="listings" />
           <Header />
           <main className="flex-1">{children}</main>
           <Footer />
