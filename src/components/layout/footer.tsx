@@ -23,6 +23,12 @@ const COMPANY_LINKS = [
   { label: 'Contact', href: '/contact' },
 ]
 
+const SUITE_LINKS = [
+  { label: 'Strata — AI assistant', href: 'https://strata.uqlabs.co' },
+  { label: 'ReelMaker — reel rendering', href: 'https://reelmaker.uqlabs.co' },
+  { label: 'PropReels — property feed', href: 'https://propreels.uqlabs.co' },
+]
+
 const LEGAL_LINKS = [
   { label: 'Terms', href: '/terms' },
   { label: 'Privacy', href: '/privacy' },
@@ -84,6 +90,7 @@ export function Footer() {
           {/* Link columns */}
           <FooterLinkColumn heading="Browse" links={BROWSE_LINKS} />
           <FooterLinkColumn heading="Discover" links={DISCOVER_LINKS} />
+          <FooterLinkColumn heading="The Suite" links={SUITE_LINKS} />
           <FooterLinkColumn heading="Company" links={COMPANY_LINKS} />
           <FooterLinkColumn heading="Legal" links={LEGAL_LINKS} />
         </div>
