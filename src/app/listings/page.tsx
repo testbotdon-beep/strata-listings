@@ -25,6 +25,10 @@ interface PageProps {
     mrt?: string
     q?: string
     sort?: string
+    hdb_type?: string
+    furnishing?: string
+    pets_allowed?: string
+    cooking_allowed?: string
   }>
 }
 
