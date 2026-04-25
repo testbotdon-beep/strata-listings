@@ -14,8 +14,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { SG_DISTRICTS, PROPERTY_TYPE_LABELS, POPULAR_MRTS } from '@/types/listing'
-import type { ListingType, PropertyType, FurnishingLevel } from '@/types/listing'
+import { SG_DISTRICTS, PROPERTY_TYPE_LABELS, POPULAR_MRTS, HDB_TYPE_LABELS, FACING_LABELS, CONDITION_LABELS } from '@/types/listing'
+import type { ListingType, PropertyType, FurnishingLevel, HdbType, Facing, PropertyCondition } from '@/types/listing'
 
 const AMENITIES_OPTIONS = [
   'Pool', 'Gym', 'Concierge', 'Tennis Court', 'BBQ Pit', 'Function Room',
@@ -63,6 +63,19 @@ interface FormState {
   postal_code: string
   mrt_nearest: string
   mrt_distance_m: string
+  // PropertyGuru-parity fields
+  available_from: string
+  lease_term_months: string
+  pets_allowed: '' | 'yes' | 'no'
+  cooking_allowed: '' | 'yes' | 'no'
+  hdb_type: HdbType | ''
+  negotiable: boolean
+  facing: Facing | ''
+  parking_lots: string
+  balcony: '' | 'yes' | 'no'
+  property_condition: PropertyCondition | ''
+  listing_reference: string
+  co_broke: boolean
 }
 
 const INITIAL_FORM: FormState = {
@@ -84,6 +97,18 @@ const INITIAL_FORM: FormState = {
   postal_code: '',
   mrt_nearest: '',
   mrt_distance_m: '',
+  available_from: '',
+  lease_term_months: '',
+  pets_allowed: '',
+  cooking_allowed: '',
+  hdb_type: '',
+  negotiable: false,
+  facing: '',
+  parking_lots: '',
+  balcony: '',
+  property_condition: '',
+  listing_reference: '',
+  co_broke: false,
 }
 
 type FormMode = 'draft' | 'published' | null
@@ -195,6 +220,19 @@ export default function NewListingPage() {
       top_year: form.top_year ? Number(form.top_year) : undefined,
       mrt_nearest: form.mrt_nearest || undefined,
       mrt_distance_m: form.mrt_distance_m ? Number(form.mrt_distance_m) : undefined,
+      // PropertyGuru-parity additions (all optional on backend)
+      available_from: form.available_from || undefined,
+      lease_term_months: form.lease_term_months ? Number(form.lease_term_months) : undefined,
+      pets_allowed: form.pets_allowed === '' ? undefined : form.pets_allowed === 'yes',
+      cooking_allowed: form.cooking_allowed === '' ? undefined : form.cooking_allowed === 'yes',
+      hdb_type: form.hdb_type || undefined,
+      negotiable: form.negotiable,
+      facing: form.facing || undefined,
+      parking_lots: form.parking_lots ? Number(form.parking_lots) : undefined,
+      balcony: form.balcony === '' ? undefined : form.balcony === 'yes',
+      property_condition: form.property_condition || undefined,
+      listing_reference: form.listing_reference.trim() || undefined,
+      co_broke: form.co_broke,
       status: mode === 'draft' ? 'draft' : 'active',
     }
 
@@ -495,6 +533,140 @@ export default function NewListingPage() {
               onChange={(e) => update('mrt_distance_m', e.target.value)}
             />
           </FormField>
+        </FormSection>
+
+        <FormSection
+          title="Property Details"
+          description="Extra fields buyers and tenants always ask about."
+        >
+          {form.property_type === 'hdb' && (
+            <FormField label="HDB Type">
+              <Select
+                value={form.hdb_type}
+                onValueChange={(v) => update('hdb_type', (v ?? '') as HdbType | '')}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select HDB type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.entries(HDB_TYPE_LABELS).map(([value, label]) => (
+                    <SelectItem key={value} value={value}>{label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </FormField>
+          )}
+
+          <FormField label="Available From">
+            <Input
+              type="date"
+              value={form.available_from}
+              onChange={(e) => update('available_from', e.target.value)}
+            />
+          </FormField>
+
+          {form.type === 'rent' && (
+            <>
+              <FormField label="Minimum Lease (months)">
+                <Input
+                  type="number"
+                  placeholder="12"
+                  min={1}
+                  value={form.lease_term_months}
+                  onChange={(e) => update('lease_term_months', e.target.value)}
+                />
+              </FormField>
+              <FormField label="Pets Allowed">
+                <Select value={form.pets_allowed} onValueChange={(v) => update('pets_allowed', (v ?? '') as 'yes' | 'no' | '')}>
+                  <SelectTrigger className="w-full"><SelectValue placeholder="Pets" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="yes">Yes</SelectItem>
+                    <SelectItem value="no">No</SelectItem>
+                  </SelectContent>
+                </Select>
+              </FormField>
+              <FormField label="Cooking Allowed">
+                <Select value={form.cooking_allowed} onValueChange={(v) => update('cooking_allowed', (v ?? '') as 'yes' | 'no' | '')}>
+                  <SelectTrigger className="w-full"><SelectValue placeholder="Cooking" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="yes">Yes</SelectItem>
+                    <SelectItem value="no">No</SelectItem>
+                  </SelectContent>
+                </Select>
+              </FormField>
+            </>
+          )}
+
+          <FormField label="Facing">
+            <Select value={form.facing} onValueChange={(v) => update('facing', (v ?? '') as Facing | '')}>
+              <SelectTrigger className="w-full"><SelectValue placeholder="Compass direction" /></SelectTrigger>
+              <SelectContent>
+                {Object.entries(FACING_LABELS).map(([value, label]) => (
+                  <SelectItem key={value} value={value}>{label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </FormField>
+
+          <FormField label="Property Condition">
+            <Select value={form.property_condition} onValueChange={(v) => update('property_condition', (v ?? '') as PropertyCondition | '')}>
+              <SelectTrigger className="w-full"><SelectValue placeholder="New / Renovated / Original" /></SelectTrigger>
+              <SelectContent>
+                {Object.entries(CONDITION_LABELS).map(([value, label]) => (
+                  <SelectItem key={value} value={value}>{label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </FormField>
+
+          <FormField label="Parking Lots">
+            <Input
+              type="number"
+              placeholder="1"
+              min={0}
+              value={form.parking_lots}
+              onChange={(e) => update('parking_lots', e.target.value)}
+            />
+          </FormField>
+
+          <FormField label="Balcony">
+            <Select value={form.balcony} onValueChange={(v) => update('balcony', (v ?? '') as 'yes' | 'no' | '')}>
+              <SelectTrigger className="w-full"><SelectValue placeholder="Has balcony?" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="yes">Yes</SelectItem>
+                <SelectItem value="no">No</SelectItem>
+              </SelectContent>
+            </Select>
+          </FormField>
+
+          <FormField label="Listing Reference (optional)">
+            <Input
+              placeholder="Your internal reference"
+              value={form.listing_reference}
+              onChange={(e) => update('listing_reference', e.target.value)}
+            />
+          </FormField>
+
+          <div className="col-span-2 flex flex-col gap-2 mt-2">
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={form.negotiable}
+                onChange={(e) => update('negotiable', e.target.checked)}
+                className="size-4"
+              />
+              <span>Price is negotiable</span>
+            </label>
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={form.co_broke}
+                onChange={(e) => update('co_broke', e.target.checked)}
+                className="size-4"
+              />
+              <span>Open to co-broke (commission split with buyer&apos;s agent)</span>
+            </label>
+          </div>
         </FormSection>
 
         <FormSection title="Amenities" description="Select all facilities available.">

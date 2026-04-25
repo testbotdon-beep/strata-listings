@@ -2,6 +2,9 @@ export type PropertyType = 'hdb' | 'condo' | 'landed' | 'commercial'
 export type ListingType = 'rent' | 'sale'
 export type ListingStatus = 'active' | 'sold' | 'rented' | 'draft'
 export type FurnishingLevel = 'unfurnished' | 'partial' | 'fully'
+export type Facing = 'N' | 'NE' | 'E' | 'SE' | 'S' | 'SW' | 'W' | 'NW'
+export type PropertyCondition = 'new' | 'renovated' | 'original'
+export type HdbType = '1rm' | '2rm' | '3rm' | '4rm' | '5rm' | 'executive' | 'maisonette' | 'jumbo'
 
 export interface Agent {
   id: string
@@ -49,6 +52,20 @@ export interface Listing {
   views: number
   created_at: string
   updated_at: string
+
+  // PropertyGuru-parity additions — all optional so legacy listings still validate
+  available_from?: string | null
+  lease_term_months?: number | null
+  pets_allowed?: boolean | null
+  cooking_allowed?: boolean | null
+  hdb_type?: HdbType | null
+  negotiable?: boolean
+  facing?: Facing | null
+  parking_lots?: number | null
+  balcony?: boolean | null
+  property_condition?: PropertyCondition | null
+  listing_reference?: string | null
+  co_broke?: boolean
 }
 
 export interface Inquiry {
@@ -68,11 +85,16 @@ export interface Inquiry {
 export interface SearchFilters {
   type?: ListingType
   property_type?: PropertyType
+  hdb_type?: HdbType
   district?: number
   min_price?: number
   max_price?: number
   bedrooms?: number
   mrt?: string
+  furnishing?: FurnishingLevel
+  pets_allowed?: boolean
+  cooking_allowed?: boolean
+  available_by?: string
   query?: string
   sort?: 'newest' | 'price_asc' | 'price_desc' | 'popular'
 }
@@ -93,6 +115,34 @@ export const FURNISHING_LABELS: Record<FurnishingLevel, string> = {
   unfurnished: 'Unfurnished',
   partial: 'Partially Furnished',
   fully: 'Fully Furnished',
+}
+
+export const HDB_TYPE_LABELS: Record<HdbType, string> = {
+  '1rm': '1-Room',
+  '2rm': '2-Room',
+  '3rm': '3-Room',
+  '4rm': '4-Room',
+  '5rm': '5-Room',
+  executive: 'Executive (EA / EM)',
+  maisonette: 'Maisonette',
+  jumbo: 'Jumbo',
+}
+
+export const FACING_LABELS: Record<Facing, string> = {
+  N: 'North',
+  NE: 'North-East',
+  E: 'East',
+  SE: 'South-East',
+  S: 'South',
+  SW: 'South-West',
+  W: 'West',
+  NW: 'North-West',
+}
+
+export const CONDITION_LABELS: Record<PropertyCondition, string> = {
+  new: 'New',
+  renovated: 'Renovated',
+  original: 'Original',
 }
 
 export const SG_DISTRICTS: Record<number, string> = {
