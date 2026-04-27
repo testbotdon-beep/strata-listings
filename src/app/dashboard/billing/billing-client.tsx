@@ -25,9 +25,12 @@ interface BillingUser {
 
 interface Plan {
   priceMonthly: number
+  priceMonthlyOriginal: number
+  priceYearly: number
   currency: string
   name: string
   tagline: string
+  yearlyDiscountPct: number
 }
 
 interface Props {
@@ -46,6 +49,7 @@ export function BillingClient({
   canceled,
 }: Props) {
   const router = useRouter()
+  const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>('monthly')
   const [stripeLoading, setStripeLoading] = useState(false)
   const [stripeError, setStripeError] = useState<string | null>(null)
   const [recheckLoading, setRecheckLoading] = useState(false)
@@ -71,7 +75,11 @@ export function BillingClient({
     setStripeLoading(true)
     setStripeError(null)
     try {
-      const res = await fetch('/api/billing/checkout', { method: 'POST' })
+      const res = await fetch('/api/billing/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ billing_period: billingPeriod }),
+      })
       const data = await res.json()
       if (!res.ok) {
         setStripeError(data.error || 'Could not start checkout')
@@ -219,21 +227,67 @@ export function BillingClient({
           {/* Plan pricing card */}
           <div className="rounded-2xl border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-blue-50 p-5 sm:p-8">
             <div className="mb-4">
-              <p className="text-xs font-semibold text-primary uppercase tracking-wide">
-                {plan.name}
-              </p>
-              <div className="mt-2 flex items-baseline gap-2 flex-wrap">
+              <div className="flex items-center justify-between gap-2 flex-wrap">
+                <p className="text-xs font-semibold text-primary uppercase tracking-wide">
+                  {plan.name}
+                </p>
+                <span className="rounded-full bg-emerald-100 text-emerald-700 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide">
+                  Launch price
+                </span>
+              </div>
+
+              {/* Billing period toggle */}
+              <div className="mt-4 inline-flex rounded-full bg-slate-100 p-1 text-xs font-semibold">
+                <button
+                  type="button"
+                  onClick={() => setBillingPeriod('monthly')}
+                  className={
+                    billingPeriod === 'monthly'
+                      ? 'rounded-full bg-white px-3 py-1.5 text-slate-900 shadow-sm'
+                      : 'px-3 py-1.5 text-slate-500'
+                  }
+                >
+                  Monthly
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setBillingPeriod('yearly')}
+                  className={
+                    billingPeriod === 'yearly'
+                      ? 'rounded-full bg-white px-3 py-1.5 text-slate-900 shadow-sm inline-flex items-center gap-1.5'
+                      : 'px-3 py-1.5 text-slate-500 inline-flex items-center gap-1.5'
+                  }
+                >
+                  Yearly
+                  <span className="rounded-full bg-emerald-100 text-emerald-700 px-1.5 py-0.5 text-[10px] font-bold">
+                    -{plan.yearlyDiscountPct}%
+                  </span>
+                </button>
+              </div>
+
+              <div className="mt-3 flex items-baseline gap-2 flex-wrap">
                 <span className="text-4xl sm:text-5xl font-bold text-slate-900">
-                  ${plan.priceMonthly}
+                  $
+                  {billingPeriod === 'yearly'
+                    ? Math.round(plan.priceYearly / 12)
+                    : plan.priceMonthly}
                 </span>
                 <span className="text-base text-slate-500">/month</span>
+                <span className="text-xs text-slate-400 line-through">
+                  ${plan.priceMonthlyOriginal}
+                </span>
               </div>
+              <p className="text-xs text-slate-500 mt-1">
+                {billingPeriod === 'yearly'
+                  ? `Billed yearly at $${plan.priceYearly}/year — save ${plan.yearlyDiscountPct}%`
+                  : 'Billed monthly. Switch to yearly for 10% off.'}
+              </p>
               <p className="mt-2 text-sm text-slate-600">{plan.tagline}</p>
             </div>
 
             <ul className="space-y-2 mb-6">
               {[
-                'Unlimited listings',
+                '15 listings (vs 5 on the free tier)',
                 'Agent profile page with all your listings',
                 'WhatsApp click-to-chat on every listing',
                 'Listing views + inquiry analytics',
@@ -265,7 +319,9 @@ export function BillingClient({
               ) : (
                 <>
                   <CreditCard className="h-4 w-4" />
-                  Subscribe for ${plan.priceMonthly}/month
+                  {billingPeriod === 'yearly'
+                    ? `Subscribe for $${plan.priceYearly}/year`
+                    : `Subscribe for $${plan.priceMonthly}/month`}
                 </>
               )}
             </Button>

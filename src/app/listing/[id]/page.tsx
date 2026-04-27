@@ -29,6 +29,23 @@ import { ImageGallery } from '@/components/image-gallery'
 import { FavoriteButton } from '@/components/favorite-button'
 import { ListingCard } from '@/components/listing-card'
 import { MortgageWidget } from '@/components/mortgage-widget'
+import { RecentTransactions } from '@/components/recent-transactions'
+
+// Pulls the SG town/area name out of an address string. Falls back to '' so
+// the widget gracefully hides if we can't infer one.
+function extractTown(address: string): string {
+  if (!address) return ''
+  const upper = address.toUpperCase()
+  const towns = [
+    'ANG MO KIO', 'BEDOK', 'BISHAN', 'BUKIT BATOK', 'BUKIT MERAH', 'BUKIT PANJANG',
+    'BUKIT TIMAH', 'CENTRAL', 'CHOA CHU KANG', 'CLEMENTI', 'GEYLANG', 'HOUGANG',
+    'JURONG EAST', 'JURONG WEST', 'KALLANG', 'WHAMPOA', 'MARINE PARADE',
+    'PASIR RIS', 'PUNGGOL', 'QUEENSTOWN', 'SEMBAWANG', 'SENGKANG', 'SERANGOON',
+    'TAMPINES', 'TOA PAYOH', 'WOODLANDS', 'YISHUN', 'TENGAH',
+  ]
+  for (const t of towns) if (upper.includes(t)) return t
+  return ''
+}
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -558,6 +575,11 @@ export default async function ListingDetailPage({ params }: PageProps) {
                   Calculate in detail →
                 </Link>
               </div>
+            )}
+
+            {/* Recent HDB transactions in the area (HDB only) */}
+            {property_type === 'hdb' && (
+              <RecentTransactions town={extractTown(address)} propertyType="hdb" />
             )}
 
           </aside>

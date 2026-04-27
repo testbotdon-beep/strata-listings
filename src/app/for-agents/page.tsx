@@ -12,15 +12,15 @@ import {
 export const metadata: Metadata = {
   title: 'For Agents — Strata Listings',
   description:
-    'Unlimited property listings for $79/month. 10× cheaper than PropertyGuru. Buyers reach you on WhatsApp with listing context pre-loaded.',
+    '5 property listings free for everyone. 15 free if you subscribe to Strata. $30/month for 15 listings (launch price). 10× cheaper than PropertyGuru.',
 }
 
 const FEATURES = [
   {
     icon: Zap,
-    title: 'Unlimited listings',
+    title: 'Up to 15 listings',
     description:
-      'Post as many properties as you want for one flat price. No per-listing credits, no daily fees, no "featured boost" upsells. Upload HDB, condo, landed, commercial — whatever you\'ve got.',
+      '5 listings free for everyone. 15 if you subscribe to Strata AI, or pay $30/mo (launch price) for 15. No per-listing credits, no daily fees, no "featured boost" upsells. HDB, condo, landed, commercial — whatever you\'ve got.',
   },
   {
     icon: MessageCircle,
@@ -57,17 +57,16 @@ export default function ForAgentsPage() {
 
             {/* Headline */}
             <h1 className="text-balance text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
-              Unlimited listings. $79/month.
+              5 listings free. 15 with Strata.
             </h1>
 
             {/* Subtitle */}
             <p className="text-base text-slate-300 sm:text-lg leading-relaxed">
               Singapore&apos;s property marketplace, built for agents. Post
-              unlimited listings for a tenth of what you&apos;re paying
-              PropertyGuru, with buyers reaching you directly on WhatsApp.
-              Already a Strata AI subscriber?{' '}
+              listings for a fraction of PropertyGuru, with buyers reaching you
+              directly on WhatsApp. Already a Strata AI subscriber?{' '}
               <span className="text-white font-semibold">
-                It&apos;s included free.
+                You get 15 listings free.
               </span>
             </p>
 
@@ -77,7 +76,7 @@ export default function ForAgentsPage() {
                 href="/sign-up"
                 className="inline-flex items-center justify-center gap-2 rounded-lg bg-white px-6 py-3 text-sm font-semibold text-slate-900 hover:bg-slate-100 transition-colors"
               >
-                Start for $79/month
+                Start free — 5 listings
                 <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
@@ -178,36 +177,77 @@ export default function ForAgentsPage() {
               Simple, transparent pricing
             </h2>
             <p className="text-slate-500 max-w-xl mx-auto">
-              One flat price. Unlimited listings. No ad credits, no boost
-              upsells, no commission on closed deals.
+              5 listings free. 15 with Strata or $30/mo. No ad credits, no
+              boost upsells, no commission on closed deals.
             </p>
           </div>
 
-          <div className="grid gap-5 md:grid-cols-2 items-stretch">
-            {/* Standalone plan */}
-            <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 shadow-sm flex flex-col">
+          <div className="grid gap-5 md:grid-cols-3 items-stretch">
+            {/* Free tier */}
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm flex flex-col">
               <div className="mb-6">
                 <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">
-                  Strata Listings Pro
+                  Free
                 </p>
                 <div className="flex items-baseline gap-2 flex-wrap">
-                  <span className="text-5xl font-bold text-slate-900">$79</span>
-                  <span className="text-base text-slate-500">/month</span>
+                  <span className="text-5xl font-bold text-slate-900">$0</span>
                 </div>
                 <p className="mt-2 text-sm text-slate-500">
-                  Billed monthly. Cancel anytime.
+                  No card. Get started in 60 seconds.
                 </p>
               </div>
 
               <ul className="space-y-2.5 mb-6 flex-1">
                 {[
-                  'Unlimited listings',
+                  '5 listings',
                   'Unlimited photos per listing',
-                  'Agent profile page with all your properties',
-                  'WhatsApp click-to-chat on every listing',
-                  'Listing views + click analytics',
-                  'SEO-optimised pages (rank on Google)',
+                  'WhatsApp click-to-chat',
+                  'SEO-optimised pages',
                   'District, MRT, and PSF placement',
+                ].map((feature) => (
+                  <li key={feature} className="flex items-start gap-2 text-sm text-slate-700">
+                    <span className="mt-0.5 flex size-4 items-center justify-center rounded-full bg-emerald-100 shrink-0">
+                      <span className="size-1.5 rounded-full bg-emerald-500" />
+                    </span>
+                    {feature}
+                  </li>
+                ))}
+              </ul>
+
+              <Link
+                href="/sign-up"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-slate-900 bg-white px-5 py-3 text-sm font-semibold text-slate-900 hover:bg-slate-50 transition-colors"
+              >
+                Sign up free
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+
+            {/* Paid Listings */}
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm flex flex-col relative">
+              <span className="absolute -top-3 right-6 inline-flex items-center gap-1 rounded-full bg-emerald-500 px-3 py-1 text-xs font-semibold text-white shadow-sm">
+                Launch
+              </span>
+              <div className="mb-6">
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">
+                  Pro
+                </p>
+                <div className="flex items-baseline gap-2 flex-wrap">
+                  <span className="text-5xl font-bold text-slate-900">$30</span>
+                  <span className="text-base text-slate-500">/month</span>
+                  <span className="text-xs text-slate-400 line-through">$60</span>
+                </div>
+                <p className="mt-2 text-sm text-slate-500">
+                  Or $324/yr — save 10%. Cancel anytime.
+                </p>
+              </div>
+
+              <ul className="space-y-2.5 mb-6 flex-1">
+                {[
+                  '15 listings',
+                  'Everything in free, plus:',
+                  'Agent profile page with all your properties',
+                  'Listing views + click analytics',
                   'No commission on closed deals',
                 ].map((feature) => (
                   <li key={feature} className="flex items-start gap-2 text-sm text-slate-700">
@@ -223,13 +263,13 @@ export default function ForAgentsPage() {
                 href="/sign-up"
                 className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-slate-900 bg-white px-5 py-3 text-sm font-semibold text-slate-900 hover:bg-slate-50 transition-colors"
               >
-                Start now — $79/mo
+                Start now — $30/mo
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
 
             {/* Strata bundle */}
-            <div className="rounded-2xl border-2 border-primary bg-gradient-to-br from-primary/5 to-blue-50 p-6 sm:p-8 shadow-sm flex flex-col relative">
+            <div className="rounded-2xl border-2 border-primary bg-gradient-to-br from-primary/5 to-blue-50 p-6 shadow-sm flex flex-col relative">
               <span className="absolute -top-3 right-6 inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-white shadow-sm">
                 <Zap className="h-3 w-3" />
                 Best value
@@ -239,24 +279,22 @@ export default function ForAgentsPage() {
                   Strata AI + Listings
                 </p>
                 <div className="flex items-baseline gap-2 flex-wrap">
-                  <span className="text-5xl font-bold text-slate-900">$249</span>
+                  <span className="text-5xl font-bold text-slate-900">$60</span>
                   <span className="text-base text-slate-500">/month</span>
                 </div>
                 <p className="mt-2 text-sm text-slate-600">
-                  <span className="font-semibold text-slate-900">Listings included free</span>
-                  {' '}— normally $79/mo on its own.
+                  <span className="font-semibold text-slate-900">15 listings included free</span>
+                  {' '}— normally $30/mo on its own.
                 </p>
               </div>
 
               <ul className="space-y-2.5 mb-6 flex-1">
                 {[
-                  'Everything in Strata Listings Pro',
+                  'Everything in Listings Pro',
                   'Strata AI WhatsApp assistant',
                   'AI qualifies buyers in under 5 seconds, 24/7',
                   'Auto lead scoring + viewing scheduler',
                   '300 AI-qualified leads per month',
-                  'Multi-channel — WhatsApp, Listings, PropertyGuru',
-                  'Full lead pipeline with one-click approvals',
                   'Cancel anytime',
                 ].map((feature) => (
                   <li key={feature} className="flex items-start gap-2 text-sm text-slate-700">
@@ -279,7 +317,7 @@ export default function ForAgentsPage() {
           </div>
 
           <p className="mt-8 text-center text-xs text-slate-400">
-            Already paying for Strata AI? Sign up with the same email — Strata Listings unlocks automatically, free.
+            Already paying for Strata AI? Sign up with the same email — Listings unlocks 15 free automatically.
           </p>
         </div>
       </section>
@@ -294,9 +332,9 @@ export default function ForAgentsPage() {
           </div>
           <blockquote className="text-lg font-medium text-slate-800 leading-relaxed mb-6">
             &ldquo;I was paying PropertyGuru $800+ a month for listings. Strata
-            Listings is $79 for the same unlimited listings, and buyers message
-            me on WhatsApp with the listing title already in their first
-            message. I&apos;m saving $700/mo and closing more deals.&rdquo;
+            Listings starts free with 5, and $30 for 15. Buyers message me on
+            WhatsApp with the listing title already in their first message.
+            I&apos;m saving $700/mo and closing more deals.&rdquo;
           </blockquote>
           <div className="flex items-center justify-center gap-3">
             <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-sm font-bold text-primary">

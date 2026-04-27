@@ -98,7 +98,7 @@ function SignUpContent() {
             Create your agent account
           </h1>
           <p className="mt-2 text-sm text-slate-500">
-            One account for Strata, PropReels, ReelMaker and Listings. $79/month for unlimited listings. Cancel anytime.
+            One account for Strata, PropReels, ReelMaker and Listings. 5 listings free, 15 with Strata sub. Cancel anytime.
           </p>
         </div>
 
