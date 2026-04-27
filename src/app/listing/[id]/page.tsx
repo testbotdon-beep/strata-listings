@@ -560,28 +560,6 @@ export default async function ListingDetailPage({ params }: PageProps) {
               </div>
             )}
 
-            {/* Book a viewing card */}
-            <div className="rounded-xl border border-slate-200 bg-white p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <Calendar className="h-4 w-4 text-slate-400" />
-                <p className="text-sm font-semibold text-slate-900">Book a viewing</p>
-              </div>
-              <p className="text-xs text-slate-500 leading-relaxed mb-3">
-                Message {agent.name.split(' ')[0]} on WhatsApp with your preferred date and time.
-              </p>
-              <a
-                href={whatsappUrl(
-                  agent.phone,
-                  `Hi ${agent.name}, I'd like to book a viewing for "${title}" at ${address}. When are you available?`
-                )}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-600 transition-colors"
-              >
-                <MessageCircle className="h-4 w-4" />
-                Request a viewing
-              </a>
-            </div>
           </aside>
         </div>
       </div>
