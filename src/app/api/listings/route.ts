@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { buildListing, saveListing, getUserById, type NewListingPayload } from '@/lib/storage'
 import type { ListingType, PropertyType, FurnishingLevel } from '@/types/listing'
 import { auth } from '@/lib/auth'
-import { hasActiveSubscription } from '@/lib/subscription'
+import { getListingQuota } from '@/lib/subscription'
 
 const VALID_TYPES: ListingType[] = ['rent', 'sale']
 const VALID_PROPERTY_TYPES: PropertyType[] = ['hdb', 'condo', 'landed', 'commercial']
@@ -17,14 +17,22 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
   }
 
-  // Subscription gate — only active agents can publish listings
+  // Quota gate — free=5, paid=15, Strata sub=15
   const user = await getUserById(session.user.id)
-  if (!hasActiveSubscription(user)) {
+  if (!user) {
+    return NextResponse.json({ error: 'User not found' }, { status: 404 })
+  }
+  const quota = await getListingQuota(user)
+  if (!quota.canPost) {
     return NextResponse.json(
       {
-        error:
-          'Your account is not active. Subscribe to publish listings.',
-        code: 'subscription_required',
+        error: `You've used all ${quota.max} listings on your plan. ${
+          quota.isStrataSubscriber || quota.isPaid
+            ? 'Delete an old listing to free up a slot.'
+            : 'Upgrade to Listings Pro for 15 listings, or subscribe to Strata to get 15 free.'
+        }`,
+        code: 'quota_exceeded',
+        quota,
       },
       { status: 402 }
     )
