@@ -118,11 +118,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(null)
   const [quota, setQuota] = useState<{
     used: number
-    max: number
-    canPost: boolean
-    isPaid: boolean
+    freeQuota: number
     isStrataSubscriber: boolean
+    withinFreeQuota: boolean
+    nextChargeCents: number
   } | null>(null)
+  const [hasCard, setHasCard] = useState<boolean | null>(null)
 
   const agent: SidebarAgent = {
     name: session?.user?.name ?? 'Agent',
@@ -155,11 +156,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       })
       .catch(() => {})
 
-    // Also fetch quota for the upgrade banner
+    // Quota for the upgrade banner
     fetch('/api/quota')
       .then((r) => (r.ok ? r.json() : null))
       .then((q) => {
         if (!cancelled && q && typeof q.used === 'number') setQuota(q)
+      })
+      .catch(() => {})
+
+    // Card on file (controls whether banner says 'add card' vs hidden)
+    fetch('/api/billing/card-status')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((s) => {
+        if (!cancelled && s) setHasCard(!!s.hasCard)
       })
       .catch(() => {})
 
@@ -168,13 +177,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     }
   }, [sessionStatus, pathname])
 
-  // Show the upgrade banner when the user has hit their free cap AND isn't paid
-  // AND isn't a Strata subscriber. (Strata subs are 'active' with source = strata_subscriber.)
+  // Show the add-card banner when user has used their free quota AND has no card.
+  // Once they add a card, banner goes away (next listing just gets charged $10).
   const showActivationBanner =
     !!quota &&
-    !quota.canPost &&
-    !quota.isPaid &&
-    !quota.isStrataSubscriber &&
+    !quota.withinFreeQuota &&
+    hasCard === false &&
     !pathname.startsWith('/dashboard/billing')
 
   const currentPage = NAV_LINKS.find((l) =>
@@ -250,18 +258,18 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   <AlertCircle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
                   <div className="min-w-0">
                     <p className="text-sm font-semibold text-amber-900">
-                      You&apos;ve used all 5 free listings
+                      You&apos;ve used all {quota?.freeQuota ?? 5} free listings
                     </p>
                     <p className="text-xs text-amber-700 mt-0.5">
-                      Upgrade to Pro for 15 listings ($30/mo, launch price). Or subscribe to Strata to get 15 free.
+                      Add a card to publish more at $10 each. Subscribe to Strata for 15 free.
                     </p>
                   </div>
                 </div>
                 <Link
-                  href="/dashboard/billing"
+                  href="/dashboard/billing?add_card=1"
                   className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-lg bg-amber-600 px-4 py-2 text-xs font-semibold text-white hover:bg-amber-700 transition-colors whitespace-nowrap"
                 >
-                  Upgrade
+                  Add card
                 </Link>
               </div>
             </div>

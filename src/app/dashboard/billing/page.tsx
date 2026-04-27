@@ -1,16 +1,17 @@
 import { redirect } from 'next/navigation'
 import { getCurrentUser } from '@/lib/auth'
 import { isStripeConfigured } from '@/lib/stripe'
-import { PLAN } from '@/lib/subscription'
+import { getListingQuota, QUOTA_FREE, QUOTA_STRATA, PRICE_PER_EXTRA_LISTING_CENTS } from '@/lib/subscription'
 import { BillingClient } from './billing-client'
 
 export const dynamic = 'force-dynamic'
 
 interface PageProps {
   searchParams: Promise<{
-    success?: string
-    canceled?: string
+    card_added?: string
+    card_canceled?: string
     session_id?: string
+    add_card?: string
   }>
 }
 
@@ -19,6 +20,7 @@ export default async function BillingPage({ searchParams }: PageProps) {
   if (!user) redirect('/sign-in?callbackUrl=/dashboard/billing')
 
   const params = await searchParams
+  const quota = await getListingQuota(user)
 
   return (
     <BillingClient
@@ -28,12 +30,23 @@ export default async function BillingPage({ searchParams }: PageProps) {
         name: user.name,
         subscription_status: user.subscription_status,
         subscription_source: user.subscription_source,
-        subscription_activated_at: user.subscription_activated_at,
+        stripe_customer_id: user.stripe_customer_id,
       }}
-      plan={PLAN}
+      quota={{
+        used: quota.used,
+        freeQuota: quota.freeQuota,
+        isStrataSubscriber: quota.isStrataSubscriber,
+        withinFreeQuota: quota.withinFreeQuota,
+        nextChargeCents: quota.nextChargeCents,
+      }}
+      pricePerListingCents={PRICE_PER_EXTRA_LISTING_CENTS}
+      quotaFree={QUOTA_FREE}
+      quotaStrata={QUOTA_STRATA}
       stripeReady={isStripeConfigured()}
-      success={params.success === '1'}
-      canceled={params.canceled === '1'}
+      cardAdded={params.card_added === '1'}
+      cardCanceled={params.card_canceled === '1'}
+      autoOpenAddCard={params.add_card === '1'}
+      sessionId={params.session_id}
     />
   )
 }

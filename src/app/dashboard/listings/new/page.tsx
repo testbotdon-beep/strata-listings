@@ -244,6 +244,20 @@ export default function NewListingPage() {
       })
       const data = await res.json()
       if (!res.ok) {
+        // Quota exceeded with no card on file: bounce to billing to add card
+        if (res.status === 402 && data?.code === 'card_required') {
+          window.location.href = '/dashboard/billing?add_card=1'
+          return
+        }
+        // Card declined: bounce to billing so they can replace card
+        if (res.status === 402 && data?.code === 'card_declined') {
+          setError('Your card was declined. Replace it in Billing and resubmit.')
+          setSubmitMode(null)
+          setTimeout(() => {
+            window.location.href = '/dashboard/billing'
+          }, 1500)
+          return
+        }
         setError(data.error || 'Failed to save listing')
         setSubmitMode(null)
         return
