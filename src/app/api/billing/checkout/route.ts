@@ -4,7 +4,7 @@ import { getStripe, isStripeConfigured } from '@/lib/stripe'
 import { getUserById, updateUser } from '@/lib/storage'
 
 /**
- * Creates a Stripe Checkout Session for the $79/mo subscription and
+ * Creates a Stripe Checkout Session for the $30/mo (or yearly) subscription and
  * returns the session URL. Client redirects the browser to it.
  *
  * If Stripe isn't configured yet (no STRIPE_SECRET_KEY env var), returns
@@ -32,6 +32,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'User not found' }, { status: 404 })
   }
 
+  let billingPeriod: 'monthly' | 'yearly' = 'monthly'
+  try {
+    const body = await request.json().catch(() => ({}))
+    if (body?.billing_period === 'yearly') billingPeriod = 'yearly'
+  } catch {
+    // no body — default monthly
+  }
+
   // Resolve base URL from request
   const origin =
     request.headers.get('origin') ||
@@ -44,7 +52,10 @@ export async function POST(request: NextRequest) {
       payment_method_types: ['card'],
       line_items: [
         {
-          price: process.env.STRIPE_PRICE_ID!,
+          price:
+            billingPeriod === 'yearly'
+              ? process.env.STRIPE_PRICE_ID_ANNUAL!
+              : process.env.STRIPE_PRICE_ID!,
           quantity: 1,
         },
       ],

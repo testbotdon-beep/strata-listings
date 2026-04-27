@@ -29,6 +29,23 @@ import { ImageGallery } from '@/components/image-gallery'
 import { FavoriteButton } from '@/components/favorite-button'
 import { ListingCard } from '@/components/listing-card'
 import { MortgageWidget } from '@/components/mortgage-widget'
+import { RecentTransactions } from '@/components/recent-transactions'
+
+// Pulls the SG town/area name out of an address string. Falls back to '' so
+// the widget gracefully hides if we can't infer one.
+function extractTown(address: string): string {
+  if (!address) return ''
+  const upper = address.toUpperCase()
+  const towns = [
+    'ANG MO KIO', 'BEDOK', 'BISHAN', 'BUKIT BATOK', 'BUKIT MERAH', 'BUKIT PANJANG',
+    'BUKIT TIMAH', 'CENTRAL', 'CHOA CHU KANG', 'CLEMENTI', 'GEYLANG', 'HOUGANG',
+    'JURONG EAST', 'JURONG WEST', 'KALLANG', 'WHAMPOA', 'MARINE PARADE',
+    'PASIR RIS', 'PUNGGOL', 'QUEENSTOWN', 'SEMBAWANG', 'SENGKANG', 'SERANGOON',
+    'TAMPINES', 'TOA PAYOH', 'WOODLANDS', 'YISHUN', 'TENGAH',
+  ]
+  for (const t of towns) if (upper.includes(t)) return t
+  return ''
+}
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -560,28 +577,11 @@ export default async function ListingDetailPage({ params }: PageProps) {
               </div>
             )}
 
-            {/* Book a viewing card */}
-            <div className="rounded-xl border border-slate-200 bg-white p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <Calendar className="h-4 w-4 text-slate-400" />
-                <p className="text-sm font-semibold text-slate-900">Book a viewing</p>
-              </div>
-              <p className="text-xs text-slate-500 leading-relaxed mb-3">
-                Message {agent.name.split(' ')[0]} on WhatsApp with your preferred date and time.
-              </p>
-              <a
-                href={whatsappUrl(
-                  agent.phone,
-                  `Hi ${agent.name}, I'd like to book a viewing for "${title}" at ${address}. When are you available?`
-                )}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-600 transition-colors"
-              >
-                <MessageCircle className="h-4 w-4" />
-                Request a viewing
-              </a>
-            </div>
+            {/* Recent HDB transactions in the area (HDB only) */}
+            {property_type === 'hdb' && (
+              <RecentTransactions town={extractTown(address)} propertyType="hdb" />
+            )}
+
           </aside>
         </div>
       </div>

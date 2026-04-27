@@ -104,8 +104,8 @@ export async function POST(request: NextRequest) {
     photo_url,
     bio: '',
     strata_agent_id: null,
-    // If this email matches a paying Strata subscriber, activate immediately.
-    // Otherwise they land in 'trialing' and must subscribe to $79/mo Listings.
+    // If this email matches a paying Strata subscriber, activate immediately
+    // (15 listings). Otherwise they land in 'trialing' (5 free listings).
     subscription_status: isStrataSubscriber ? 'active' : 'trialing',
     subscription_source: isStrataSubscriber ? 'strata_subscriber' : null,
     stripe_customer_id: strataCheck.stripeCustomerId,

@@ -116,6 +116,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [mobileOpen, setMobileOpen] = useState(false)
   const { data: session, status: sessionStatus } = useSession()
   const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(null)
+  const [quota, setQuota] = useState<{
+    used: number
+    max: number
+    canPost: boolean
+    isPaid: boolean
+    isStrataSubscriber: boolean
+  } | null>(null)
 
   const agent: SidebarAgent = {
     name: session?.user?.name ?? 'Agent',
@@ -123,26 +130,51 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     image: session?.user?.image,
   }
 
-  // Fetch subscription status for the banner
+  // Fetch subscription status for the banner. If the user is not active,
+  // auto-recheck against Strata once — catches users who subscribed to
+  // Strata after their last Listings sign-in.
   useEffect(() => {
     if (sessionStatus !== 'authenticated') return
     let cancelled = false
     fetch('/api/users/me')
       .then((r) => (r.ok ? r.json() : null))
-      .then((u) => {
-        if (!cancelled && u?.subscription_status) {
-          setSubscriptionStatus(u.subscription_status)
+      .then(async (u) => {
+        if (cancelled || !u?.subscription_status) return
+        if (u.subscription_status === 'active') {
+          setSubscriptionStatus('active')
+          return
+        }
+        try {
+          const r = await fetch('/api/billing/recheck', { method: 'POST' })
+          const data = await r.json().catch(() => null)
+          if (cancelled) return
+          setSubscriptionStatus(data?.status ?? u.subscription_status)
+        } catch {
+          if (!cancelled) setSubscriptionStatus(u.subscription_status)
         }
       })
       .catch(() => {})
+
+    // Also fetch quota for the upgrade banner
+    fetch('/api/quota')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((q) => {
+        if (!cancelled && q && typeof q.used === 'number') setQuota(q)
+      })
+      .catch(() => {})
+
     return () => {
       cancelled = true
     }
   }, [sessionStatus, pathname])
 
+  // Show the upgrade banner when the user has hit their free cap AND isn't paid
+  // AND isn't a Strata subscriber. (Strata subs are 'active' with source = strata_subscriber.)
   const showActivationBanner =
-    subscriptionStatus !== null &&
-    subscriptionStatus !== 'active' &&
+    !!quota &&
+    !quota.canPost &&
+    !quota.isPaid &&
+    !quota.isStrataSubscriber &&
     !pathname.startsWith('/dashboard/billing')
 
   const currentPage = NAV_LINKS.find((l) =>
@@ -218,10 +250,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   <AlertCircle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
                   <div className="min-w-0">
                     <p className="text-sm font-semibold text-amber-900">
-                      Activate your account to publish listings
+                      You&apos;ve used all 5 free listings
                     </p>
                     <p className="text-xs text-amber-700 mt-0.5">
-                      Subscribe for $79/month — free if you&apos;re a Strata AI subscriber.
+                      Upgrade to Pro for 15 listings ($30/mo, launch price). Or subscribe to Strata to get 15 free.
                     </p>
                   </div>
                 </div>
@@ -229,7 +261,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   href="/dashboard/billing"
                   className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-lg bg-amber-600 px-4 py-2 text-xs font-semibold text-white hover:bg-amber-700 transition-colors whitespace-nowrap"
                 >
-                  Activate account
+                  Upgrade
                 </Link>
               </div>
             </div>

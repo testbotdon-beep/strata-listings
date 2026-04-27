@@ -1,9 +1,9 @@
 import { redirect } from 'next/navigation'
 import { getCurrentUser } from '@/lib/auth'
-import { hasActiveSubscription } from '@/lib/subscription'
+import { getListingQuota } from '@/lib/subscription'
 
-// Subscription gate for the new-listing form. Unpaid agents get redirected
-// to the billing page where they can subscribe.
+// Quota gate for the new-listing form. Free users get 5, paid get 15, Strata
+// subs get 15. Anyone over their cap gets bounced to billing.
 export default async function NewListingLayout({
   children,
 }: {
@@ -11,6 +11,7 @@ export default async function NewListingLayout({
 }) {
   const user = await getCurrentUser()
   if (!user) redirect('/sign-in?callbackUrl=/dashboard/listings/new')
-  if (!hasActiveSubscription(user)) redirect('/dashboard/billing')
+  const quota = await getListingQuota(user)
+  if (!quota.canPost) redirect('/dashboard/billing?quota_full=1')
   return <>{children}</>
 }
