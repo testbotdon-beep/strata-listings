@@ -1,9 +1,10 @@
-type Active = 'strata' | 'listings' | 'propreels' | null
+type Active = 'strata' | 'listings' | 'propreels' | 'reelmaker' | null
 
 const PRODUCTS: { key: Exclude<Active, null>; label: string; href: string }[] = [
   { key: 'strata', label: 'Strata', href: 'https://strata.uqlabs.co' },
   { key: 'listings', label: 'Listings', href: 'https://listings.uqlabs.co' },
   { key: 'propreels', label: 'PropReels', href: 'https://propreels.uqlabs.co' },
+  { key: 'reelmaker', label: 'ReelMaker', href: 'https://reelmaker.uqlabs.co' },
 ]
 
 export function UniqHeader({ active }: { active?: Active }) {
