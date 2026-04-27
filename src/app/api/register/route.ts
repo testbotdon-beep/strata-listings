@@ -1,7 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
+import { createClient } from '@supabase/supabase-js'
 import { getUserByEmail, saveUser, generateId, type StoredUser } from '@/lib/storage'
 import { isActiveStrataSubscriber } from '@/lib/strata-membership'
+
+/**
+ * Mirror the Listings signup into the shared Strata Supabase project so
+ * the same email + password works across the whole ecosystem.
+ * Failures are non-fatal — Listings account still created. Cross-product
+ * SSO can be backfilled later if Supabase is unreachable at this moment.
+ */
+async function mirrorToSupabase(email: string, password: string, name: string) {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  if (!url || !anon) return
+  const supabase = createClient(url, anon, { auth: { persistSession: false } })
+  try {
+    await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { full_name: name } },
+    })
+  } catch (err) {
+    console.error('[register] Supabase mirror failed:', err)
+  }
+}
 
 interface RegisterPayload {
   email?: string
@@ -98,6 +121,10 @@ export async function POST(request: NextRequest) {
     console.error('[api/register] saveUser failed:', err)
     return NextResponse.json({ error: 'Failed to create account' }, { status: 500 })
   }
+
+  // Mirror to Supabase so the same email+password works on Strata/PropReels/ReelMaker.
+  // Non-fatal: if it fails, the Listings account still works; SSO back-fills next attempt.
+  void mirrorToSupabase(normalizedEmail, password, user.name)
 
   console.log(`[REGISTER] New agent: ${user.email} (${user.id})`)
 

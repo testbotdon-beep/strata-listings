@@ -103,6 +103,18 @@ export async function POST(request: NextRequest) {
     top_year: body.top_year,
     mrt_nearest: body.mrt_nearest,
     mrt_distance_m: body.mrt_distance_m,
+    available_from: body.available_from,
+    lease_term_months: body.lease_term_months,
+    pets_allowed: body.pets_allowed,
+    cooking_allowed: body.cooking_allowed,
+    hdb_type: body.hdb_type,
+    negotiable: body.negotiable,
+    facing: body.facing,
+    parking_lots: body.parking_lots,
+    balcony: body.balcony,
+    property_condition: body.property_condition,
+    listing_reference: body.listing_reference,
+    co_broke: body.co_broke,
     status: body.status === 'draft' ? 'draft' : 'active',
   })
 

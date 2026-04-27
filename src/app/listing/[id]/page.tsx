@@ -22,12 +22,13 @@ import { getListingByIdAsync, getAllListings } from '@/lib/listings'
 import { whatsappUrl } from '@/lib/whatsapp'
 
 export const dynamic = 'force-dynamic'
-import { LISTING_TYPE_LABELS, SG_DISTRICTS, PROPERTY_TYPE_LABELS, FURNISHING_LABELS } from '@/types/listing'
+import { LISTING_TYPE_LABELS, SG_DISTRICTS, PROPERTY_TYPE_LABELS, FURNISHING_LABELS, HDB_TYPE_LABELS, FACING_LABELS, CONDITION_LABELS } from '@/types/listing'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { ImageGallery } from '@/components/image-gallery'
 import { FavoriteButton } from '@/components/favorite-button'
 import { ListingCard } from '@/components/listing-card'
+import { MortgageWidget } from '@/components/mortgage-widget'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -81,6 +82,19 @@ export default async function ListingDetailPage({ params }: PageProps) {
     agent,
     views,
     created_at,
+    available_from,
+    lease_term_months,
+    pets_allowed,
+    cooking_allowed,
+    hdb_type,
+    negotiable,
+    facing,
+    parking_lots,
+    balcony,
+    property_condition,
+    co_broke,
+    lat,
+    lng,
   } = listing
 
   const districtName = SG_DISTRICTS[district]
@@ -103,6 +117,17 @@ export default async function ListingDetailPage({ params }: PageProps) {
     ...(tenure ? [{ label: 'Tenure', value: tenure }] : []),
     { label: 'Furnishing', value: furnishingLabel },
     ...(floor_level ? [{ label: 'Floor Level', value: floor_level }] : []),
+    ...(hdb_type ? [{ label: 'HDB Type', value: HDB_TYPE_LABELS[hdb_type] }] : []),
+    ...(facing ? [{ label: 'Facing', value: FACING_LABELS[facing] }] : []),
+    ...(property_condition ? [{ label: 'Condition', value: CONDITION_LABELS[property_condition] }] : []),
+    ...(parking_lots != null ? [{ label: 'Parking', value: `${parking_lots} ${parking_lots === 1 ? 'lot' : 'lots'}` }] : []),
+    ...(balcony != null ? [{ label: 'Balcony', value: balcony ? 'Yes' : 'No' }] : []),
+    ...(available_from ? [{ label: 'Available From', value: new Date(available_from).toLocaleDateString('en-SG', { day: 'numeric', month: 'short', year: 'numeric' }) }] : []),
+    ...(type === 'rent' && lease_term_months ? [{ label: 'Min Lease', value: `${lease_term_months} months` }] : []),
+    ...(type === 'rent' && pets_allowed != null ? [{ label: 'Pets', value: pets_allowed ? 'Allowed' : 'Not allowed' }] : []),
+    ...(type === 'rent' && cooking_allowed != null ? [{ label: 'Cooking', value: cooking_allowed ? 'Allowed' : 'Not allowed' }] : []),
+    ...(negotiable ? [{ label: 'Price', value: 'Negotiable' }] : []),
+    ...(co_broke ? [{ label: 'Co-broke', value: 'Open' }] : []),
   ]
 
   const descParagraphs = description
@@ -336,6 +361,14 @@ export default async function ListingDetailPage({ params }: PageProps) {
               </div>
             </section>
 
+            {/* Mortgage estimate (sale listings only) */}
+            {type === 'sale' && (
+              <>
+                <Separator />
+                <MortgageWidget price={price} />
+              </>
+            )}
+
             {/* Amenities */}
             {amenities.length > 0 && (
               <>
@@ -527,28 +560,6 @@ export default async function ListingDetailPage({ params }: PageProps) {
               </div>
             )}
 
-            {/* Book a viewing card */}
-            <div className="rounded-xl border border-slate-200 bg-white p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <Calendar className="h-4 w-4 text-slate-400" />
-                <p className="text-sm font-semibold text-slate-900">Book a viewing</p>
-              </div>
-              <p className="text-xs text-slate-500 leading-relaxed mb-3">
-                Message {agent.name.split(' ')[0]} on WhatsApp with your preferred date and time.
-              </p>
-              <a
-                href={whatsappUrl(
-                  agent.phone,
-                  `Hi ${agent.name}, I'd like to book a viewing for "${title}" at ${address}. When are you available?`
-                )}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-600 transition-colors"
-              >
-                <MessageCircle className="h-4 w-4" />
-                Request a viewing
-              </a>
-            </div>
           </aside>
         </div>
       </div>

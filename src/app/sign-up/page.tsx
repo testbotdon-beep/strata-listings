@@ -98,7 +98,7 @@ function SignUpContent() {
             Create your agent account
           </h1>
           <p className="mt-2 text-sm text-slate-500">
-            $79/month for unlimited listings. Cancel anytime.
+            One account for Strata, PropReels, ReelMaker and Listings. $79/month for unlimited listings. Cancel anytime.
           </p>
         </div>
 
@@ -107,8 +107,7 @@ function SignUpContent() {
             Already paying for Strata AI?
           </p>
           <p className="mt-1 text-xs text-slate-600 leading-relaxed">
-            Sign up below with the <span className="font-semibold">same email</span> you use
-            on Strata AI and Listings unlocks free — no payment, no code, automatic.
+            Sign in with your Strata password instead. Listings unlocks automatically, no separate signup needed.
           </p>
         </div>
 

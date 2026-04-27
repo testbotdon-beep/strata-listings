@@ -123,15 +123,27 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     image: session?.user?.image,
   }
 
-  // Fetch subscription status for the banner
+  // Fetch subscription status for the banner. If the user is not active,
+  // auto-recheck against Strata once — catches users who subscribed to
+  // Strata after their last Listings sign-in.
   useEffect(() => {
     if (sessionStatus !== 'authenticated') return
     let cancelled = false
     fetch('/api/users/me')
       .then((r) => (r.ok ? r.json() : null))
-      .then((u) => {
-        if (!cancelled && u?.subscription_status) {
-          setSubscriptionStatus(u.subscription_status)
+      .then(async (u) => {
+        if (cancelled || !u?.subscription_status) return
+        if (u.subscription_status === 'active') {
+          setSubscriptionStatus('active')
+          return
+        }
+        try {
+          const r = await fetch('/api/billing/recheck', { method: 'POST' })
+          const data = await r.json().catch(() => null)
+          if (cancelled) return
+          setSubscriptionStatus(data?.status ?? u.subscription_status)
+        } catch {
+          if (!cancelled) setSubscriptionStatus(u.subscription_status)
         }
       })
       .catch(() => {})

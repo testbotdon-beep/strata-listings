@@ -210,6 +210,19 @@ export interface NewListingPayload {
   mrt_distance_m?: number
   status: 'active' | 'draft'
   featured?: boolean
+  // PropertyGuru-parity additions
+  available_from?: string
+  lease_term_months?: number
+  pets_allowed?: boolean
+  cooking_allowed?: boolean
+  hdb_type?: import('@/types/listing').HdbType
+  negotiable?: boolean
+  facing?: import('@/types/listing').Facing
+  parking_lots?: number
+  balcony?: boolean
+  property_condition?: import('@/types/listing').PropertyCondition
+  listing_reference?: string
+  co_broke?: boolean
 }
 
 export function buildListing(payload: NewListingPayload): StoredListing {
@@ -250,5 +263,18 @@ export function buildListing(payload: NewListingPayload): StoredListing {
     views: 0,
     created_at: now,
     updated_at: now,
+    // PropertyGuru-parity fields, all default to null/false
+    available_from: payload.available_from ?? null,
+    lease_term_months: payload.lease_term_months ?? null,
+    pets_allowed: payload.pets_allowed ?? null,
+    cooking_allowed: payload.cooking_allowed ?? null,
+    hdb_type: payload.hdb_type ?? null,
+    negotiable: payload.negotiable ?? false,
+    facing: payload.facing ?? null,
+    parking_lots: payload.parking_lots ?? null,
+    balcony: payload.balcony ?? null,
+    property_condition: payload.property_condition ?? null,
+    listing_reference: payload.listing_reference ?? null,
+    co_broke: payload.co_broke ?? false,
   }
 }

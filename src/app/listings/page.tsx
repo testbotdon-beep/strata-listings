@@ -25,6 +25,10 @@ interface PageProps {
     mrt?: string
     q?: string
     sort?: string
+    hdb_type?: string
+    furnishing?: string
+    pets_allowed?: string
+    cooking_allowed?: string
   }>
 }
 
@@ -56,6 +60,12 @@ export default async function ListingsPage({ searchParams }: PageProps) {
   }
   if (params.mrt) filters.mrt = params.mrt
   if (params.q) filters.query = params.q
+  if (params.hdb_type) filters.hdb_type = params.hdb_type as SearchFilters['hdb_type']
+  if (params.furnishing) filters.furnishing = params.furnishing as SearchFilters['furnishing']
+  if (params.pets_allowed === 'true') filters.pets_allowed = true
+  else if (params.pets_allowed === 'false') filters.pets_allowed = false
+  if (params.cooking_allowed === 'true') filters.cooking_allowed = true
+  else if (params.cooking_allowed === 'false') filters.cooking_allowed = false
   if (
     params.sort === 'newest' ||
     params.sort === 'price_asc' ||
@@ -76,19 +86,30 @@ export default async function ListingsPage({ searchParams }: PageProps) {
       </div>
 
       {/* Page header */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground sm:text-3xl">
-          {filters.type === 'rent'
-            ? 'Properties for Rent'
-            : filters.type === 'sale'
-            ? 'Properties for Sale'
-            : 'All Properties'}
-        </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {count === 0
-            ? 'No properties found'
-            : `${count} propert${count === 1 ? 'y' : 'ies'} found`}
-        </p>
+      <div className="mb-6 flex items-end justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground sm:text-3xl">
+            {filters.type === 'rent'
+              ? 'Properties for Rent'
+              : filters.type === 'sale'
+              ? 'Properties for Sale'
+              : 'All Properties'}
+          </h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {count === 0
+              ? 'No properties found'
+              : `${count} propert${count === 1 ? 'y' : 'ies'} found`}
+          </p>
+        </div>
+        <a
+          href="/listings/map"
+          className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="size-4">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m-6 3l6-3" />
+          </svg>
+          Map view
+        </a>
       </div>
 
       <div className="flex gap-8">
