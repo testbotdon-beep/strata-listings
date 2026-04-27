@@ -294,7 +294,7 @@ export default function ForAgentsPage() {
                   'Strata AI WhatsApp assistant',
                   'AI qualifies buyers in under 5 seconds, 24/7',
                   'Auto lead scoring + viewing scheduler',
-                  '300 AI-qualified leads per month',
+                  '100 AI-qualified leads per month',
                   'Cancel anytime',
                 ].map((feature) => (
                   <li key={feature} className="flex items-start gap-2 text-sm text-slate-700">
