@@ -524,7 +524,7 @@ export default async function HomePage() {
               <span className="font-semibold text-slate-900">
                 Are you a property agent?
               </span>{' '}
-              5 listings free for everyone. 15 free if you subscribe to Strata. Or $30/mo (launch) for 15.
+              5 listings free for everyone. 15 free with Strata. $10 per extra listing after that, no subscription.
             </p>
             <Link
               href="/for-agents"

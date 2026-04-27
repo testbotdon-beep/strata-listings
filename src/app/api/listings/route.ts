@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { buildListing, saveListing, getUserById, type NewListingPayload } from '@/lib/storage'
 import type { ListingType, PropertyType, FurnishingLevel } from '@/types/listing'
 import { auth } from '@/lib/auth'
-import { getListingQuota } from '@/lib/subscription'
+import { getListingQuota, PRICE_PER_EXTRA_LISTING_CENTS } from '@/lib/subscription'
+import { getStripe, isStripeConfigured } from '@/lib/stripe'
 
 const VALID_TYPES: ListingType[] = ['rent', 'sale']
 const VALID_PROPERTY_TYPES: PropertyType[] = ['hdb', 'condo', 'landed', 'commercial']
@@ -17,25 +18,94 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
   }
 
-  // Quota gate — free=5, paid=15, Strata sub=15
+  // Quota gate. 5 free for everyone, 15 free for Strata subs, $10/listing after.
   const user = await getUserById(session.user.id)
   if (!user) {
     return NextResponse.json({ error: 'User not found' }, { status: 404 })
   }
   const quota = await getListingQuota(user)
-  if (!quota.canPost) {
-    return NextResponse.json(
-      {
-        error: `You've used all ${quota.max} listings on your plan. ${
-          quota.isStrataSubscriber || quota.isPaid
-            ? 'Delete an old listing to free up a slot.'
-            : 'Upgrade to Listings Pro for 15 listings, or subscribe to Strata to get 15 free.'
-        }`,
-        code: 'quota_exceeded',
-        quota,
-      },
-      { status: 402 }
-    )
+  let chargedCents = 0
+
+  if (!quota.withinFreeQuota) {
+    // Over the free quota: must charge before saving.
+    if (!isStripeConfigured()) {
+      return NextResponse.json(
+        { error: 'Billing not available right now. Please try again later.', code: 'stripe_unavailable' },
+        { status: 503 }
+      )
+    }
+    if (!user.stripe_customer_id) {
+      return NextResponse.json(
+        {
+          error: `You've used all ${quota.freeQuota} free listings. Add a card to publish more at $10 each.`,
+          code: 'card_required',
+          quota,
+        },
+        { status: 402 }
+      )
+    }
+
+    const stripe = getStripe()!
+    let customer
+    try {
+      customer = await stripe.customers.retrieve(user.stripe_customer_id)
+    } catch {
+      return NextResponse.json(
+        { error: 'Could not load your billing profile.', code: 'card_required', quota },
+        { status: 402 }
+      )
+    }
+    const defaultPm =
+      !customer.deleted && customer.invoice_settings?.default_payment_method
+    if (!defaultPm) {
+      return NextResponse.json(
+        {
+          error: `You've used all ${quota.freeQuota} free listings. Add a card to publish more at $10 each.`,
+          code: 'card_required',
+          quota,
+        },
+        { status: 402 }
+      )
+    }
+
+    // Off-session charge for the next listing slot.
+    try {
+      const intent = await stripe.paymentIntents.create({
+        amount: PRICE_PER_EXTRA_LISTING_CENTS,
+        currency: 'sgd',
+        customer: user.stripe_customer_id,
+        payment_method: typeof defaultPm === 'string' ? defaultPm : defaultPm.id,
+        off_session: true,
+        confirm: true,
+        description: `Listings — extra listing slot (#${quota.used + 1})`,
+        metadata: {
+          user_id: user.id,
+          listing_index: String(quota.used + 1),
+          product: 'strata-listings',
+        },
+      })
+      if (intent.status !== 'succeeded') {
+        return NextResponse.json(
+          {
+            error: 'Card was declined. Update your card on file and try again.',
+            code: 'card_declined',
+            quota,
+          },
+          { status: 402 }
+        )
+      }
+      chargedCents = PRICE_PER_EXTRA_LISTING_CENTS
+    } catch (err) {
+      console.error('[api/listings] charge failed:', err)
+      return NextResponse.json(
+        {
+          error: 'Card was declined. Update your card on file and try again.',
+          code: 'card_declined',
+          quota,
+        },
+        { status: 402 }
+      )
+    }
   }
 
   let body: Partial<NewListingPayload>
@@ -133,6 +203,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to save listing' }, { status: 500 })
   }
 
-  console.log(`[LISTING CREATED] ${listing.id} by ${agentId}`)
-  return NextResponse.json({ success: true, listing })
+  console.log(`[LISTING CREATED] ${listing.id} by ${agentId} charged=${chargedCents}c`)
+  return NextResponse.json({ success: true, listing, charged_cents: chargedCents })
 }
