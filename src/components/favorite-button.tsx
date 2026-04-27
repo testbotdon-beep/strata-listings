@@ -30,7 +30,7 @@ export function FavoriteButton({
         onClick={handleClick}
         aria-label={favorited ? 'Remove from saved' : 'Save listing'}
         className={cn(
-          'absolute right-2 top-2 z-10 flex h-8 w-8 items-center justify-center rounded-full',
+          'flex h-8 w-8 items-center justify-center rounded-full',
           'bg-white/90 backdrop-blur-sm shadow-sm',
           'transition-all duration-200 hover:scale-110 hover:bg-white',
           className
