@@ -55,9 +55,40 @@ export async function POST(request: NextRequest) {
         { status: 402 }
       )
     }
-    const defaultPm =
-      !customer.deleted && customer.invoice_settings?.default_payment_method
-    if (!defaultPm) {
+    if (customer.deleted) {
+      return NextResponse.json(
+        { error: 'Add a card to publish more listings at $10 each.', code: 'card_required', quota },
+        { status: 402 }
+      )
+    }
+
+    // Resolve a usable PaymentMethod. Strata subscribers go through Stripe's
+    // subscription checkout which sets the PM on the *subscription* but NOT on
+    // customer.invoice_settings.default_payment_method. So when the explicit
+    // default is missing we fall back to listing the customer's cards and
+    // promoting the first one to default (so future charges don't need this).
+    let defaultPmId: string | null = null
+    const explicitDefault = customer.invoice_settings?.default_payment_method
+    if (typeof explicitDefault === 'string') defaultPmId = explicitDefault
+    else if (explicitDefault && 'id' in explicitDefault) defaultPmId = explicitDefault.id
+
+    if (!defaultPmId) {
+      const pms = await stripe.paymentMethods.list({
+        customer: user.stripe_customer_id,
+        type: 'card',
+        limit: 1,
+      })
+      if (pms.data.length > 0) {
+        defaultPmId = pms.data[0].id
+        await stripe.customers
+          .update(user.stripe_customer_id, {
+            invoice_settings: { default_payment_method: defaultPmId },
+          })
+          .catch(() => {})
+      }
+    }
+
+    if (!defaultPmId) {
       return NextResponse.json(
         {
           error: `You've used all ${quota.freeQuota} free listings. Add a card to publish more at $10 each.`,
@@ -74,7 +105,7 @@ export async function POST(request: NextRequest) {
         amount: PRICE_PER_EXTRA_LISTING_CENTS,
         currency: 'sgd',
         customer: user.stripe_customer_id,
-        payment_method: typeof defaultPm === 'string' ? defaultPm : defaultPm.id,
+        payment_method: defaultPmId,
         off_session: true,
         confirm: true,
         description: `Listings — extra listing slot (#${quota.used + 1})`,
