@@ -1,6 +1,5 @@
 import Link from 'next/link'
 import { Building2 } from 'lucide-react'
-import { FooterNewsletter } from '@/components/layout/footer-newsletter'
 
 const BROWSE_LINKS = [
   { label: 'Buy', href: '/listings?type=sale' },
@@ -83,8 +82,6 @@ export function Footer() {
               Singapore&apos;s trusted property marketplace. Verified listings from licensed CEA agents across all 28 districts.
             </p>
 
-            {/* Newsletter signup */}
-            <FooterNewsletter />
           </div>
 
           {/* Link columns */}
