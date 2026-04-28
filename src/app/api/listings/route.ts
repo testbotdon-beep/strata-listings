@@ -26,9 +26,6 @@ export async function POST(request: NextRequest) {
   const quota = await getListingQuota(user)
   let chargedCents = 0
 
-<<<<<<< Updated upstream
-  if (!quota.withinFreeQuota) {
-=======
   // Test bypass — emails in BILLING_TEST_EMAILS skip the over-quota charge
   // so the flow can be smoke-tested without spending. Set env to '' to disable.
   const testEmails = (process.env.BILLING_TEST_EMAILS || '')
@@ -38,7 +35,6 @@ export async function POST(request: NextRequest) {
   const isTestUser = testEmails.includes(user.email.toLowerCase())
 
   if (!quota.withinFreeQuota && !isTestUser) {
->>>>>>> Stashed changes
     // Over the free quota: must charge before saving.
     if (!isStripeConfigured()) {
       return NextResponse.json(
