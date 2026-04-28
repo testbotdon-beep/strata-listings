@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Calendar, Clock, ArrowRight, TrendingUp, Home, DollarSign, FileText, User } from 'lucide-react'
+import { Calendar, Clock, ArrowRight, TrendingUp, Home, DollarSign, FileText } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { getArticles, getFeaturedArticles, type Article } from '@/lib/articles'
 
@@ -97,10 +97,6 @@ function FeaturedCard({ article }: { article: Article }) {
         <div className="mt-4 flex items-center justify-between">
           <div className="flex items-center gap-2.5 text-xs text-slate-400">
             <span className="flex items-center gap-1">
-              <User className="h-3 w-3" />
-              {article.author}
-            </span>
-            <span className="flex items-center gap-1">
               <Calendar className="h-3 w-3" />
               {formatDate(article.publishedAt)}
             </span>
@@ -137,10 +133,6 @@ function ArticleCard({ article }: { article: Article }) {
           {article.title}
         </h3>
         <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-400">
-          <span className="flex items-center gap-1">
-            <User className="h-3 w-3" />
-            {article.author}
-          </span>
           <span className="flex items-center gap-1">
             <Calendar className="h-3 w-3" />
             {formatDate(article.publishedAt)}

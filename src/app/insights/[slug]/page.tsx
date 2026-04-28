@@ -72,7 +72,6 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       images: [{ url: article.coverImage }],
       type: 'article',
       publishedTime: article.publishedAt,
-      authors: [article.author],
     },
   }
 }
@@ -172,13 +171,6 @@ export default async function ArticlePage({ params }: PageProps) {
 
   const related = getRelatedArticles(slug, 3)
 
-  const initials = article.author
-    .split(' ')
-    .map((n) => n[0])
-    .join('')
-    .slice(0, 2)
-    .toUpperCase()
-
   return (
     <div className="min-h-screen bg-white">
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
@@ -207,18 +199,9 @@ export default async function ArticlePage({ params }: PageProps) {
             {article.subtitle}
           </p>
 
-          {/* Author line */}
-          <div className="mt-6 flex flex-wrap items-center gap-4">
-            {/* Avatar placeholder */}
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-900 text-white text-sm font-semibold">
-              {initials}
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-slate-900 leading-tight">{article.author}</p>
-              <p className="text-xs text-slate-500">{article.authorRole}</p>
-            </div>
-            <Separator orientation="vertical" className="h-8 hidden sm:block" />
-            <div className="flex flex-wrap items-center gap-4 text-sm text-slate-400">
+          {/* Meta line */}
+          <div className="mt-6 flex flex-wrap items-center gap-4 text-sm text-slate-400">
+            <div className="flex flex-wrap items-center gap-4">
               <span className="flex items-center gap-1.5">
                 <Calendar className="h-3.5 w-3.5" />
                 {formatDate(article.publishedAt)}
