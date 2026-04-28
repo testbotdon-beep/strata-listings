@@ -18,9 +18,28 @@ export async function GET() {
   try {
     const customer = await stripe.customers.retrieve(user.stripe_customer_id)
     if (customer.deleted) return NextResponse.json({ hasCard: false })
-    const pm = customer.invoice_settings?.default_payment_method
-    if (!pm) return NextResponse.json({ hasCard: false })
-    const pmObj = typeof pm === 'string' ? await stripe.paymentMethods.retrieve(pm) : pm
+
+    // Prefer the customer's default PM; fall back to any card on file.
+    // Strata subs come out of subscription checkout with a PM attached to
+    // the subscription but no customer-level default. We treat either as
+    // 'has card' so the listing-charge route can use it later.
+    let pmObj: import('stripe').Stripe.PaymentMethod | null = null
+    const defaultPm = customer.invoice_settings?.default_payment_method
+    if (defaultPm) {
+      pmObj =
+        typeof defaultPm === 'string'
+          ? await stripe.paymentMethods.retrieve(defaultPm)
+          : (defaultPm as import('stripe').Stripe.PaymentMethod)
+    } else {
+      const pms = await stripe.paymentMethods.list({
+        customer: user.stripe_customer_id,
+        type: 'card',
+        limit: 1,
+      })
+      if (pms.data.length > 0) pmObj = pms.data[0]
+    }
+
+    if (!pmObj) return NextResponse.json({ hasCard: false })
     const card = pmObj.card
     return NextResponse.json({
       hasCard: true,
