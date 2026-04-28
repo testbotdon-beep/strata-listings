@@ -8,20 +8,28 @@ export default function AppleIcon() {
     (
       <div
         style={{
-          fontSize: 120,
           background: 'linear-gradient(135deg, #2563eb 0%, #1e40af 100%)',
           width: '100%',
           height: '100%',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          color: 'white',
-          fontWeight: 800,
-          letterSpacing: '-4px',
           borderRadius: 36,
         }}
       >
-        S
+        <svg
+          width="120"
+          height="120"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="white"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+          <polyline points="9 22 9 14 15 14 15 22" />
+        </svg>
       </div>
     ),
     { ...size }
