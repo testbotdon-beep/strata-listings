@@ -19,6 +19,13 @@ const K = {
   listing: (id: string) => `listing:${id}`,
   listingIds: 'listings:all',
   listingsByAgent: (agentId: string) => `listings:agent:${agentId}`,
+  /**
+   * Lifetime listing IDs per agent. Set membership is permanent — even after
+   * a listing is deleted, its id stays in this set. SCARD = lifetime count,
+   * which is what the quota gate checks. This makes deletion-and-repost
+   * abuse impossible.
+   */
+  lifetimeListingsByAgent: (agentId: string) => `listings:lifetime:agent:${agentId}`,
 
   user: (id: string) => `user:${id}`,
   userByEmail: (email: string) => `user:email:${email.toLowerCase()}`,
@@ -117,7 +124,24 @@ export async function saveListing(listing: StoredListing): Promise<void> {
   pipe.set(K.listing(listing.id), listing)
   pipe.sadd(K.listingIds, listing.id)
   pipe.sadd(K.listingsByAgent(listing.agent_id), listing.id)
+  // Lifetime set — never removed, even on delete. Drives the quota gate so
+  // an agent can't free up slots by deleting old listings.
+  pipe.sadd(K.lifetimeListingsByAgent(listing.agent_id), listing.id)
   await pipe.exec()
+}
+
+/**
+ * Lifetime listing count for an agent — includes deleted listings. Used by
+ * the quota gate so the free-tier cap is permanent across the agent's life,
+ * not just current inventory.
+ */
+export async function countLifetimeListingsByAgent(agentId: string): Promise<number> {
+  const n = await redis.scard(K.lifetimeListingsByAgent(agentId))
+  // Fall back to current set if lifetime set somehow ended up smaller
+  // (e.g. data drift from before this migration). Quota always uses the
+  // larger of the two.
+  const current = await redis.scard(K.listingsByAgent(agentId))
+  return Math.max(typeof n === 'number' ? n : 0, typeof current === 'number' ? current : 0)
 }
 
 export async function getStoredListing(id: string): Promise<StoredListing | null> {
@@ -145,6 +169,8 @@ export async function deleteListing(id: string): Promise<void> {
   pipe.del(K.listing(id))
   pipe.srem(K.listingIds, id)
   pipe.srem(K.listingsByAgent(listing.agent_id), id)
+  // Intentionally NOT removing from K.lifetimeListingsByAgent — lifetime
+  // count must be monotonic so quota can't be gamed by delete + repost.
   await pipe.exec()
 }
 
