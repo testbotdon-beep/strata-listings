@@ -1,5 +1,5 @@
 import 'server-only'
-import { getListingsByAgent, type StoredUser, type SubscriptionStatus } from '@/lib/storage'
+import { countLifetimeListingsByAgent, type StoredUser, type SubscriptionStatus } from '@/lib/storage'
 
 /**
  * Listings pricing. Pay-per-listing model — no monthly subscription.
@@ -39,8 +39,9 @@ export async function getListingQuota(
       nextChargeCents: 0,
     }
   }
-  const listings = await getListingsByAgent(user.id)
-  const used = listings.length
+  // Lifetime count, not current inventory. Deleting a listing does NOT free
+  // a slot — once you've used your free 5 (or 15), you've used them.
+  const used = await countLifetimeListingsByAgent(user.id)
   const isStrataSubscriber =
     user.subscription_status === 'active' && user.subscription_source === 'strata_subscriber'
   const freeQuota = isStrataSubscriber ? QUOTA_STRATA : QUOTA_FREE
